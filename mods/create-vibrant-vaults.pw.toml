@@ -1,0 +1,13 @@
+name = "Create: Vibrant Vaults"
+filename = "create_vibrant_vaults-0.3.1+1.20.1.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "c0f465c136a483d3997bfc10b90951d466fd84be"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 7224548
+project-id = 1251719

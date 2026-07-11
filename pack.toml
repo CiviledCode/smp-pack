@@ -1,0 +1,13 @@
+name = "Grxm Smp"
+author = "Civiled"
+version = "0.3.0"
+pack-format = "packwiz:1.1.0"
+
+[index]
+file = "index.toml"
+hash-format = "sha256"
+hash = "376d8f0bfa5d92c71a3a0758d46295741a165a8c369db85e1855eeaa0c3125b2"
+
+[versions]
+fabric = "0.18.3"
+minecraft = "1.20.1"

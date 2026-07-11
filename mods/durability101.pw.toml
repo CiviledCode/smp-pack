@@ -1,0 +1,13 @@
+name = "Durability101 Forge/Fabric 1.12-1.21.11"
+filename = "Durability101-fabric-1.20-0.0.5.jar"
+side = "both"
+
+[download]
+hash-format = "sha1"
+hash = "9f52df0097c13b0ced6b1cea4ec370a26d5b1bfd"
+mode = "metadata:curseforge"
+
+[update]
+[update.curseforge]
+file-id = 5304789
+project-id = 325020
