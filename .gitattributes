@@ -1,0 +1,2 @@
+# Keep Windows launchers CRLF on checkout and normalized in Git.
+*.bat text eol=crlf

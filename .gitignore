@@ -5,3 +5,7 @@ __pycache__/
 *.log
 packwiz-installer*.jar
 packwiz.json
+custom-mods/**/.gradle/
+custom-mods/**/.tools/
+custom-mods/**/build/
+custom-mods/**/run/

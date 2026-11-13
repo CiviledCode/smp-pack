@@ -36,6 +36,18 @@ def verify(download=False):
             filenames.add(key)
             assert meta['download']['url'].startswith('https://'), f'Non-HTTPS/manual download: {relative}'
             mods.append(meta)
+    # An internally valid old index can otherwise silently omit newly added mods.
+    indexed_meta = {entry['file'] for entry in index['files'] if entry.get('metafile')}
+    present_meta = {
+        path.relative_to(ROOT).as_posix()
+        for directory in ('mods', 'config', 'resourcepacks', 'shaderpacks')
+        for path in (ROOT / directory).rglob('*.pw.toml')
+        if path.is_file()
+    }
+    assert present_meta == indexed_meta, (
+        f'Metadata/index mismatch: unindexed={sorted(present_meta - indexed_meta)}, '
+        f'missing={sorted(indexed_meta - present_meta)}; run packwiz refresh'
+    )
     if download:
         def check(meta):
             request = urllib.request.Request(meta['download']['url'], headers={'User-Agent': 'CiviledCode/smp-pack verification'})

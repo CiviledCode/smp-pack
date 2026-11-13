@@ -1,0 +1,1 @@
+{"schemaVersion":1,"id":"grxmteams_integration","version":"1.0.0","name":"GRXM Teams ISOLATED TEST ONLY","environment":"server","entrypoints":{"main":["dev.grxm.teams.integration.IntegrationDriver"]},"depends":{"grxmteams":"1.0.0","fabric-api":"*","numismatics":"1.0.15+fabric-mc1.20.1"}}

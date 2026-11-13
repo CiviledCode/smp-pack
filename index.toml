@@ -501,6 +501,16 @@ hash = "7d60672df0dff49d05b7979ecfb7ba7cb4d43dd7abd048868cb5667a3b04090e"
 metafile = true
 
 [[files]]
+file = "mods/grxm-teams.pw.toml"
+hash = "8fb8fb3eec030e1701ffe80729a5a468793c329e1890710da40516018c7b82c7"
+metafile = true
+
+[[files]]
+file = "mods/handcrafted.pw.toml"
+hash = "fa8cf971776ad38e2ccca64ab565f75e1acb73e64ab479d14bfb08fc1a07104c"
+metafile = true
+
+[[files]]
 file = "mods/immediatelyfast.pw.toml"
 hash = "51b79a1eacb4f15f1626c802137c95b0a4316fefb540e6ec31cf81118b91c20b"
 metafile = true
@@ -581,6 +591,16 @@ hash = "f7cc92b62ddea918624ece8bab499bdb3829d13b16551f0df0377b7a0c51841b"
 metafile = true
 
 [[files]]
+file = "mods/rechiseled.pw.toml"
+hash = "c50d788d6c4c48e06d9174dbaf7361b0dad0b8dc9294294b7d446fa4f13f8702"
+metafile = true
+
+[[files]]
+file = "mods/resourcefullib.pw.toml"
+hash = "19853233e54f53a4c0f9c8f395bd6326fb738140404c2ac25a02ea71fd80b3d9"
+metafile = true
+
+[[files]]
 file = "mods/rightclickharvest.pw.toml"
 hash = "4987472675fd30d5ee9b292173713686cb9896124342ff909a33287aecc17806"
 metafile = true
@@ -611,6 +631,11 @@ hash = "5ec0a9a12c7f49287e09cc17b2f2e6390f3e08769a805aafa347c440811b62d0"
 metafile = true
 
 [[files]]
+file = "mods/supermartijn642s-config-lib.pw.toml"
+hash = "fd3c14506f0f69305976ba14e33bb47fc515b3d1d37bc431d0f44d4a53d66196"
+metafile = true
+
+[[files]]
 file = "mods/supermartijn642s-core-lib.pw.toml"
 hash = "7dbe736e6c0aba8639a4e501a7e78771a8d592ab8f2baa16c485fed90a57648a"
 metafile = true
@@ -618,6 +643,11 @@ metafile = true
 [[files]]
 file = "mods/txnilib.pw.toml"
 hash = "3f12e299c61128e9b68e30f814a8507437afc84e27c678fe7955ced741fc176a"
+metafile = true
+
+[[files]]
+file = "mods/visuality.pw.toml"
+hash = "42859a2f6ae73df9cfc4ffdb4d7906ddfc715564d104d8f2831bc69ca7dd0d79"
 metafile = true
 
 [[files]]

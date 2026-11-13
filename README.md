@@ -14,7 +14,13 @@ Before every launch, packwiz downloads the latest pinned mods and managed config
 
 Bliss 2.1.2 and Complementary Unbound r5.8.1 are bundled as optional client-side shader choices, alongside the original Particle Rain 3.0.6 cosmetic mod. Shaders remain disabled by default so friends can opt in under **Options → Video Settings → Shader Packs** in Iris according to their GPU. Particle Rain and shader packs are never installed on the dedicated server. Distant Horizons, Euphoria Patches, the other rain/leaf replacements, and the old multi-server integrations remain excluded. Sodium, Lithium, FerriteCore, ModernFix, Entity Culling, and ImmediatelyFast provide conservative performance improvements; spark is available for diagnosis. Content mods such as Create, Backpacked, BetterEnd, BetterNether, Camerapture, and Farmer's Delight Refabricated are retained because the world depends on them. Do not remove world-content mods as a performance shortcut.
 
-The supplied 64×64 GRXM SMP artwork is the server-list icon, Prism instance icon, and repository pack branding. Existing instances receive shader/particle updates on next launch. For Prism's launcher-level icon, change the icon manually using the artwork, or import the updated ZIP as a new instance and keep your original until you have transferred any local settings.
+The supplied 64×64 GRXM SMP artwork is the server-list icon, Prism instance icon, and repository pack branding. Existing instances receive pack updates on next launch. For Prism's launcher-level icon, change the icon manually using the artwork, or import the updated ZIP as a new instance and keep your original until you have transferred any local settings.
+
+## Release 1.5
+
+Adds Handcrafted 3.0.6, Rechiseled 1.2.6, their required ResourcefulLib/Config Lib dependencies, and client-only Visuality 0.7.1+1.20. The server-only GRXM Teams mod supplies styled teams and eight graphical badges, native Numismatics treasuries, prepaid chunk ticking, and three physically bound rotating weekly buyback counters. No additional client Java mod is needed for teams or shops; accept the small server badge resource pack when joining.
+
+See [teams and the weekly bazaar](docs/economy.md) for player commands, placing/binding counters, and operator activation. Both rent billing and bazaar payouts ship **disabled**: the operator must choose prices/quotas/rent and separately retire the old unlimited creative mint before activation. Existing world, balances, whitelist, and player-owned shops are preserved. All rates use native Numismatics spurs; team-only sale limits intentionally permit team hopping/recreation.
 
 ## Maintain the pack
 
@@ -33,4 +39,6 @@ The ZIP builder downloads the official packwiz bootstrap v0.0.3 and verifies its
 
 Use a candidate branch and test client plus server together before merging to `master`. For a coordinated update, stop announcing availability, deploy the reviewed full commit SHA to the server, then fast-forward `master` to that same commit. Friends receive it on next launch. Avoid publishing an incompatible client manifest before the server is ready. Minecraft/Fabric version changes require additional launcher/server-runtime migration review, not only a mod update.
 
-[Server operations](docs/server.md) covers deployment, console access, and rollback. [Backups and recovery](docs/backups.md) covers daily local snapshots, encrypted Backblaze B2 uploads, retention, and restore verification.
+Custom-mod source and build instructions live in [the GRXM Teams manual](custom-mods/grxm-teams/README.md). Its production JAR is published at `assets/mods/grxm-teams-1.0.0.jar`; `mods/grxm-teams.pw.toml` downloads the hash-pinned artifact from the `v1.5` tag. Publish that candidate/tag before staging the server; never move an existing release tag or distribute the integration-test JAR. Keep the JAR version, asset path, metadata hash, and tested bytes aligned when releasing a later mod revision.
+
+[Server operations](docs/server.md) covers deployment, console access, and rollback. [Backups and recovery](docs/backups.md) covers daily local snapshots, encrypted Backblaze B2 uploads, retention, and restore verification. The accepted [teams and rented chunk ticking](docs/teams-design.md) and [rotating bazaar](docs/bazaar-design.md) designs explain the contracts; runtime activation remains an explicit operator choice.

@@ -37,6 +37,12 @@ Deployment and backup locks prevent overlapping mutation. The command intentiona
 
 The updater installs `assets/grxmsmp.png` as `/srv/minecraft/server-icon.png` when the pinned revision includes it; the same source artwork is embedded in the Prism ZIP. It does not overwrite `server.properties`, whitelist, operators, service units, bootstrap, or Fabric launcher. Runtime changes must be reviewed and installed explicitly from `server/`. The archive contains tooling for reproducibility, but tools are not part of the game pack index. Do not add world data, original prompts, credentials, or personal Xaero exploration caches to Git.
 
+### Teams/economy in 1.5
+
+The `grxm-teams` JAR is server-only. Keep `config/grxmteams.json` operator-managed, outside the pack index. First deployment preserves native Numismatics accounts and adds a checked team-state attachment plus `world/data/grxmteams-initialized.guard`; subsequent backups must include bank, guard, and player files together. Do not roll back only the bank or delete the guard to bypass recovery. [Economy operations](economy.md) explains activation and the [mod manual](../custom-mods/grxm-teams/README.md) owns recovery details and journal limits.
+
+Publish the candidate's `v1.5` tag before staging: the custom JAR is downloaded from that tag and checked by SHA256. Before the first restart, an operator-managed `resourcePack.url` can point to the same tag's `assets/grxm-team-badges-1.0.0.zip` so joins never depend on advancing `master` during deployment. The SHA-1 remains `bc02f256708eb0d6928705c5f661418b3c98fb74`. Retain `billing.enabled=false` and `bazaar.enabled=false` until the operator configures the economy. Placement/binding of three counters and retirement of the original creative shell vendor are manual; deployment does neither.
+
 ## Known compatibility limits
 
 BCLib's server classes have client-only type references that Lithium cannot analyze. Lithium logs warnings and falls back to conservative behavior for those classes; the existing dimensions still load. ModernFix/Lithium also report an overlapping chunk-ticket optimization, with one overwrite skipped. Do not hide these warnings or call them proof that every optimization applies. Preserve BCLib/BetterEnd/BetterNether: the world uses their codecs and saved blocks.

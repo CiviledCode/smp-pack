@@ -1,6 +1,7 @@
 # Only game payload belongs in the pack index.
 .git
 .github
+.gitattributes
 .gitignore
 .packwizignore
 README.md
@@ -9,6 +10,7 @@ scripts
 launcher
 assets
 server
+custom-mods
 dist
 .agent-notes
 *.pyc
