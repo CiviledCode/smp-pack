@@ -1,5 +1,7 @@
 # GRXM SMP
 
+![GRXM SMP icon](assets/grxmsmp.png)
+
 A single-server Fabric 1.20.1 survival pack. The existing world is preserved; there is no Velocity proxy, cross-server inventory service, or experimental world conversion. Minecraft and Fabric Loader stay pinned to 1.20.1 and 0.18.3. This repository is the authoritative client/server mod manifest; world data, player lists, credentials, and backups stay off GitHub.
 
 ## Play
@@ -10,7 +12,9 @@ The server address, `mc.civiled.net`, is already in Multiplayer. Access is restr
 
 Before every launch, packwiz downloads the latest pinned mods and managed configuration from this repository's `master` branch. Subsequent launches normally download only changes. Internet access is required. A failed pre-launch update stops launch rather than deliberately running an out-of-date pack. Use a fresh imported instance instead of copying an old `mods` folder: unmanaged manually added mods are not guaranteed to be removed by packwiz.
 
-Shaders are disabled by default and shader packs are not bundled. Distant Horizons, Euphoria Patches, heavy rain/leaf particle replacements, and the old multi-server integrations are not included. Sodium, Lithium, FerriteCore, ModernFix, Entity Culling, and ImmediatelyFast provide conservative performance improvements; spark is available for diagnosis. Content mods such as Create, Backpacked, BetterEnd, BetterNether, Camerapture, and Farmer's Delight Refabricated are retained because the world depends on them. Do not remove world-content mods as a performance shortcut.
+Bliss 2.1.2 and Complementary Unbound r5.8.1 are bundled as optional client-side shader choices, alongside the original Particle Rain 3.0.6 cosmetic mod. Shaders remain disabled by default so friends can opt in under **Options → Video Settings → Shader Packs** in Iris according to their GPU. Particle Rain and shader packs are never installed on the dedicated server. Distant Horizons, Euphoria Patches, the other rain/leaf replacements, and the old multi-server integrations remain excluded. Sodium, Lithium, FerriteCore, ModernFix, Entity Culling, and ImmediatelyFast provide conservative performance improvements; spark is available for diagnosis. Content mods such as Create, Backpacked, BetterEnd, BetterNether, Camerapture, and Farmer's Delight Refabricated are retained because the world depends on them. Do not remove world-content mods as a performance shortcut.
+
+The supplied 64×64 GRXM SMP artwork is the server-list icon, Prism instance icon, and repository pack branding. Existing instances receive shader/particle updates on next launch. For Prism's launcher-level icon, change the icon manually using the artwork, or import the updated ZIP as a new instance and keep your original until you have transferred any local settings.
 
 ## Maintain the pack
 

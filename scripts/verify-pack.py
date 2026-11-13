@@ -27,7 +27,7 @@ def verify(download=False):
         seen.add(entry['file'])
         data = (ROOT / str(relative)).read_bytes()
         assert digest(data, index['hash-format']) == entry['hash'], f'Payload hash mismatch: {relative}'
-        assert relative.parts[0] in {'mods', 'config', 'resourcepacks'}, f'Non-game payload in index: {relative}'
+        assert relative.parts[0] in {'mods', 'config', 'resourcepacks', 'shaderpacks'}, f'Non-game payload in index: {relative}'
         if entry.get('metafile'):
             meta = tomllib.loads(data.decode())
             assert meta.get('side') in {'client', 'server', 'both'}, f'Invalid side: {relative}'

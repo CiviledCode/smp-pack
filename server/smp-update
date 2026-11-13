@@ -27,6 +27,9 @@ rsync -a --delete "$stage/mods/" /srv/minecraft/mods/
 rsync -a "$stage/config/" /srv/minecraft/config/
 install -o minecraft -g minecraft -m 640 "$stage/packwiz.json" /srv/minecraft/packwiz.json
 install -o minecraft -g minecraft -m 640 "$stage/deployed-revision" /srv/minecraft/deployed-revision
+if [[ -f "$source_dir/assets/grxmsmp.png" ]]; then
+    install -o minecraft -g minecraft -m 640 "$source_dir/assets/grxmsmp.png" /srv/minecraft/server-icon.png
+fi
 chown -R minecraft:minecraft /srv/minecraft/mods /srv/minecraft/config
 # Runtime/service/property changes require explicit operator review, not silent overwrites.
 systemctl start minecraft

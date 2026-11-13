@@ -225,6 +225,10 @@ file = "config/modmenu.json"
 hash = "9ae551ffa235b4956aea89813381c7a2c0080831e4344fd2696fa5f9795a7201"
 
 [[files]]
+file = "config/particlerain.json5"
+hash = "e2f27ba4f8f5b6a4b286308d87bb088d702d4cb709b4d96d5c5bb443a899a2d4"
+
+[[files]]
 file = "config/ponder-client.toml"
 hash = "4f675f769237d3b1bd1f67036ddea8733e5b20f76632922357395506f1207de0"
 
@@ -572,6 +576,11 @@ hash = "7ebf197c43f662a98d2064d3b46e399e1929d6e6f55ba2bc46ada0d48e56aaa1"
 metafile = true
 
 [[files]]
+file = "mods/particle-rain.pw.toml"
+hash = "f7cc92b62ddea918624ece8bab499bdb3829d13b16551f0df0377b7a0c51841b"
+metafile = true
+
+[[files]]
 file = "mods/rightclickharvest.pw.toml"
 hash = "4987472675fd30d5ee9b292173713686cb9896124342ff909a33287aecc17806"
 metafile = true
@@ -644,4 +653,14 @@ metafile = true
 [[files]]
 file = "resourcepacks/unique-dark.pw.toml"
 hash = "30e7acaa86ff543336aac55175d05f6b50a78115cd08c40657e3e83f2e0ee356"
+metafile = true
+
+[[files]]
+file = "shaderpacks/bliss-shader.pw.toml"
+hash = "8ffd81a5e0b4c3bc2daf0d86714ef56df4beb1ed87a5c41c4e9bbb94a7006bc1"
+metafile = true
+
+[[files]]
+file = "shaderpacks/complementary-unbound.pw.toml"
+hash = "608b87f75b2387a9fbd340cb18a8238bbbe5a0afc54202634b34f3000246b6e7"
 metafile = true

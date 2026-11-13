@@ -39,8 +39,11 @@ def build(output, pack_url, bootstrap_file=None):
             bootstrap = response.read()
     if hashlib.sha256(bootstrap).hexdigest() != BOOTSTRAP_SHA256:
         raise ValueError('Bootstrap SHA256 mismatch; refusing to distribute')
+    icon = (ROOT / 'assets' / 'grxmsmp.png').read_bytes()
+    if icon[:8] != b'\x89PNG\r\n\x1a\n' or struct.unpack('>II', icon[16:24]) != (64, 64):
+        raise ValueError('Pack/server icon must be a 64x64 PNG')
     cfg = '\n'.join([
-        '[General]', 'InstanceType=OneSix', 'name=GRXM SMP', 'iconKey=default',
+        '[General]', 'InstanceType=OneSix', 'name=GRXM SMP', 'iconKey=grxmsmp',
         'OverrideCommands=true',
         f'PreLaunchCommand="$INST_JAVA" -jar packwiz-installer-bootstrap.jar -g {pack_url}',
         'OverrideMemory=true', 'MinMemAlloc=1024', 'MaxMemAlloc=6144',
@@ -53,6 +56,7 @@ def build(output, pack_url, bootstrap_file=None):
     output.parent.mkdir(parents=True, exist_ok=True)
     with zipfile.ZipFile(output, 'w', compression=zipfile.ZIP_DEFLATED) as archive:
         archive.writestr('instance.cfg', cfg)
+        archive.writestr('icon.png', icon)
         archive.writestr('mmc-pack.json', json.dumps(components, indent=2) + '\n')
         archive.writestr('.minecraft/packwiz-installer-bootstrap.jar', bootstrap)
         archive.writestr('.minecraft/servers.dat', server_list())
