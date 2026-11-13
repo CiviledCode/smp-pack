@@ -1,0 +1,31 @@
+#!/usr/bin/python3
+"""Bound reproducible deployment caches; caller holds deployment/maintenance locks."""
+from pathlib import Path
+import re
+import shutil
+import sys
+
+
+def cleanup(base, current):
+    if not re.fullmatch('[0-9a-f]{40}', current):
+        raise ValueError('Invalid current revision')
+    stages = [p for p in (base/'staging').iterdir() if p.is_dir() and not p.is_symlink() and re.fullmatch('[0-9a-f]{40}', p.name)]
+    ordered = sorted(stages, key=lambda p:p.stat().st_mtime, reverse=True)
+    completed = [p for p in ordered if (p/'.deployment-complete').exists() and p.name != current]
+    incomplete = [p for p in ordered if not (p/'.deployment-complete').exists() and p.name != current]
+    keep = {current} | {p.name for p in completed[:1]} | {p.name for p in incomplete[:1]}
+    for p in stages:
+        if p.name in keep:
+            continue
+        shutil.rmtree(p)
+        source = base/'packs'/p.name
+        if source.is_dir() and not source.is_symlink():
+            shutil.rmtree(source)
+        print('Removed reproducible deployment cache:',p.name)
+    return keep
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        raise SystemExit('Usage: smp-clean-cache <current full commit SHA>')
+    cleanup(Path('/opt/minecraft'),sys.argv[1])

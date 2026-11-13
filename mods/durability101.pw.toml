@@ -1,13 +1,13 @@
 name = "Durability101 Forge/Fabric 1.12-1.21.11"
 filename = "Durability101-fabric-1.20-0.0.5.jar"
-side = "both"
+side = "client"
 
 [download]
-hash-format = "sha1"
-hash = "9f52df0097c13b0ced6b1cea4ec370a26d5b1bfd"
-mode = "metadata:curseforge"
+url = "https://cdn.modrinth.com/data/Yt3rEMOb/versions/e7pZteOV/Durability101-fabric-1.20-0.0.5.jar"
+hash-format = "sha512"
+hash = "7c8f7376505baaaac5f3ab8d1b3a30da47164e30b72ed06a18b4efb5434a09b1f1046ffd350674536cd1a277fef0fdbe26124389c88a97caf3f149733d979d5f"
 
 [update]
-[update.curseforge]
-file-id = 5304789
-project-id = 325020
+[update.modrinth]
+mod-id = "Yt3rEMOb"
+version = "e7pZteOV"

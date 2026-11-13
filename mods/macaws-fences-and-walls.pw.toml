@@ -3,11 +3,11 @@ filename = "mcw-mcwfences-1.2.1-mc1.20.1fabric.jar"
 side = "both"
 
 [download]
-hash-format = "sha1"
-hash = "c18a0d6cf58dd011692bf30ee4bdc101ba2cceed"
-mode = "metadata:curseforge"
+url = "https://cdn.modrinth.com/data/GmwLse2I/versions/bL1sIm2E/mcw-mcwfences-1.2.1-mc1.20.1fabric.jar"
+hash-format = "sha512"
+hash = "578dfc810c5aee7df4bd1ba04044d914a6a772a6dab27c389f61ee4c9a7df576c5b8e620dc84c1643be2f34140cc19b8bd50a917fad268300af86b4000f9581e"
 
 [update]
-[update.curseforge]
-file-id = 7308361
-project-id = 453925
+[update.modrinth]
+mod-id = "GmwLse2I"
+version = "bL1sIm2E"

@@ -1,0 +1,31 @@
+#!/usr/bin/python3
+"""Stop Minecraft and require positive, invocation-bound graceful-save proof."""
+import json
+from pathlib import Path
+import subprocess
+
+
+def properties():
+    output = subprocess.check_output(['systemctl', 'show', 'minecraft', '--property=ActiveState,InvocationID,MainPID,ExecMainPID,ExecMainStatus,Result'], text=True)
+    return dict(line.split('=', 1) for line in output.splitlines() if '=' in line)
+
+
+def verify(before, after, proof):
+    if after.get('ActiveState') != 'inactive' or after.get('Result') != 'success' or after.get('ExecMainStatus') != '0':
+        raise ValueError('Minecraft stop was not a successful clean exit; snapshot refused')
+    if proof.get('command') != 'stop' or not proof.get('invocation'):
+        raise ValueError('Missing affirmative graceful-stop proof; snapshot refused')
+    if before.get('ActiveState') != 'inactive':
+        if proof['invocation'] != before.get('InvocationID') or proof['pid'] != int(before.get('MainPID', '0')):
+            raise ValueError('Graceful-stop proof does not match the stopped invocation')
+    elif proof['pid'] != int(after.get('ExecMainPID', '0')):
+        raise ValueError('Existing graceful-stop proof does not match the last process')
+
+
+if __name__ == '__main__':
+    before = properties()
+    subprocess.run(['systemctl', 'stop', 'minecraft'], check=True)
+    after = properties()
+    proof = json.loads(Path('/srv/minecraft/.last-clean-stop').read_text())
+    verify(before, after, proof)
+    print('Verified graceful Minecraft shutdown for invocation', proof['invocation'])

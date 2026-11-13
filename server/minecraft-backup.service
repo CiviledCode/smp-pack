@@ -1,0 +1,8 @@
+[Unit]
+Description=Consistent GRXM SMP backup (brief maintenance stop)
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/smp-backup
+TimeoutStartSec=1800
+UMask=0077

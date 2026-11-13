@@ -1,0 +1,12 @@
+[Unit]
+Description=Retry pending encrypted GRXM SMP uploads to Backblaze B2
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/smp-offsite
+TimeoutStartSec=7200
+Nice=10
+IOSchedulingClass=idle
+UMask=0077

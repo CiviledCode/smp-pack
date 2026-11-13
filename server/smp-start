@@ -1,0 +1,10 @@
+#!/bin/bash
+set -euo pipefail
+cd /srv/minecraft
+if [[ ! -p .console ]]; then
+    [[ ! -e .console ]] || { printf 'Console path exists but is not a FIFO\n' >&2; exit 1; }
+    mkfifo -m 600 .console
+fi
+# Keep both ends open so Java never sees a premature EOF on stdin.
+exec 3<>.console
+exec /usr/bin/java -Xms2G -Xmx8G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 -jar /opt/minecraft/fabric-server.jar nogui <&3

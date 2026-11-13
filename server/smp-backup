@@ -1,0 +1,52 @@
+#!/bin/bash
+# Immutable filesystem copies make restic retries independent of server uptime.
+set -euo pipefail
+umask 077
+exec 9>/run/lock/smp-maintenance.lock
+flock -n 9 || { printf 'Another SMP maintenance operation is running\n' >&2; exit 1; }
+base=/var/backups/minecraft/snapshots
+mkdir -p "$base"
+# A crash/copy failure never promotes a partial snapshot. Retain at most one old
+# incomplete copy for diagnosis; completed pending uploads are never touched.
+python3 - "$base" <<'PY'
+from pathlib import Path
+import re,shutil,sys
+partials=sorted((p for p in Path(sys.argv[1]).iterdir() if not p.is_symlink() and p.is_dir() and re.fullmatch(r'\.\d{8}T\d{6}Z\.partial',p.name)),reverse=True)
+for p in partials[1:]:
+    print('Removing obsolete incomplete backup:',p)
+    shutil.rmtree(p)
+PY
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+partial="$base/.${stamp}.partial"
+snapshot="$base/$stamp"
+# Avoid filling the system disk. Require room for a complete new copy plus 5 GiB.
+needed=$(du -sb /srv/minecraft | python3 -c 'import sys; print(int(sys.stdin.read().split()[0])+6*1024**3)')
+available=$(df -B1 --output=avail "$base" | python3 -c 'import sys; print(sys.stdin.read().split()[-1])')
+(( available > needed )) || { printf 'Insufficient space for a safe snapshot\n' >&2; exit 1; }
+was_running=false
+systemctl is-active --quiet minecraft && was_running=true
+restart() { if "$was_running"; then systemctl start minecraft; fi; }
+trap restart EXIT
+/usr/local/sbin/smp-quiesce
+mkdir -p "$partial"
+cp -a --reflink=auto /srv/minecraft "$partial/server"
+mkdir -p "$partial/runtime"
+# Deployment caches/staging are reproducible and must not grow every backup.
+cp -a /opt/minecraft/fabric-server.jar /opt/minecraft/packwiz-installer-bootstrap.jar "$partial/runtime/"
+if [[ -f /srv/minecraft/deployed-revision ]]; then
+    revision=$(cat /srv/minecraft/deployed-revision)
+    if [[ "$revision" =~ ^[0-9a-f]{40}$ && -d "/opt/minecraft/packs/$revision" ]]; then
+        cp -a "/opt/minecraft/packs/$revision" "$partial/runtime/pack-source"
+    fi
+fi
+# The live console FIFO is process-local, not restorable data.
+rm -f "$partial/server/.console"
+mv "$partial" "$snapshot"
+restart
+was_running=false
+printf 'Consistent local snapshot: %s\n' "$snapshot"
+# Release maintenance lock before network I/O; offsite has its own lock.
+flock -u 9
+if [[ "${1:-}" != --local-only ]]; then
+    /usr/local/sbin/smp-offsite
+fi

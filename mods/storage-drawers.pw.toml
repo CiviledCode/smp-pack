@@ -5,7 +5,7 @@ side = "both"
 [download]
 hash-format = "sha1"
 hash = "dc5f3841e2d0fb61c2aebf57068ca3ddb804b8e9"
-mode = "metadata:curseforge"
+url = "https://edge.forgecdn.net/files/6994/478/StorageDrawers-fabric-1.20.1-12.14.3.jar"
 
 [update]
 [update.curseforge]

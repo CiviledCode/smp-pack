@@ -1,3 +1,0 @@
-MWName:mw$default:Default
-caveModeType:1
-dimensionTypeId:minecraft:the_nether

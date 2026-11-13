@@ -1,0 +1,44 @@
+#!/usr/bin/python3
+"""Local-only Minecraft console; no RCON port or stored RCON password."""
+import os
+import select
+import stat
+import sys
+import time
+
+command = ' '.join(sys.argv[1:])
+if not command or '\n' in command or '\r' in command:
+    raise SystemExit('Usage: smp-console <one Minecraft command>')
+path = '/srv/minecraft/.console'
+if not stat.S_ISFIFO(os.stat(path).st_mode):
+    raise SystemExit('Console is not a FIFO')
+fd = os.open(path, os.O_WRONLY | os.O_NONBLOCK)
+try:
+    if not select.select([], [fd], [], 5)[1]:
+        raise SystemExit('Console write timed out')
+    os.write(fd, (command + '\n').encode())
+finally:
+    os.close(fd)
+# systemd supplies MAINPID to ExecStop. Wait for actual world save and process exit
+# before systemd terminates the unit or a backup copies files.
+if command == 'stop' and os.environ.get('MAINPID'):
+    pid = int(os.environ['MAINPID'])
+    deadline = time.monotonic() + 170
+    while time.monotonic() < deadline:
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            from pathlib import Path
+            import json
+            invocation = os.environ.get('INVOCATION_ID')
+            if not invocation:
+                raise SystemExit('Missing systemd invocation identity for clean-stop proof')
+            target = Path('/srv/minecraft/.last-clean-stop')
+            temporary = target.with_suffix('.partial')
+            temporary.write_text(json.dumps({'invocation': invocation, 'pid': pid, 'command': 'stop'}) + '\n')
+            temporary.chmod(0o600)
+            temporary.replace(target)
+            break
+        time.sleep(0.25)
+    else:
+        raise SystemExit('Minecraft did not finish graceful shutdown within 170 seconds')

@@ -1,0 +1,13 @@
+name = "Sky's 3D Barrel"
+filename = "§6Sky's §f3D Barrel §8v1.1.zip"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/Oo27qNvv/versions/o4A2Zwtt/%C2%A76Sky%27s%20%C2%A7f3D%20Barrel%20%C2%A78v1.1.zip"
+hash-format = "sha512"
+hash = "e525a0af0ea826baf57e1f4d17fe1ef6905b929960e7c442064ef679c4ee7daada83df828420fba21b37415521b4fecee17aa81293e370976e72d9eb0d2713a3"
+
+[update]
+[update.modrinth]
+mod-id = "Oo27qNvv"
+version = "o4A2Zwtt"

@@ -1,0 +1,52 @@
+#!/usr/bin/python3
+"""Retire only previous packwiz-managed config paths, preserving unmanaged data."""
+import json
+from pathlib import Path, PurePosixPath
+import shutil
+import sys
+
+
+def managed(manifest):
+    data = json.loads(manifest.read_text())
+    paths = set()
+    for key, entry in data['cachedFiles'].items():
+        value = entry.get('cachedLocation')
+        if not value or not value.startswith('config/') or entry.get('onlyOtherSide'):
+            continue
+        relative = PurePosixPath(value)
+        if relative.is_absolute() or '..' in relative.parts:
+            raise ValueError('Unsafe managed config path')
+        paths.add(str(relative.relative_to('config')))
+    return paths
+
+
+def retire(live, staged, archive):
+    if live.is_symlink() or (live/'config').is_symlink() or (live/'mods').is_symlink():
+        raise ValueError('Refusing deployment through a symlinked game/config/mod directory')
+    root = (live/'config').resolve()
+    # Refuse symlink escapes before invoking root-owned rsync.
+    for p in (live/'config').rglob('*'):
+        if p.is_symlink():
+            raise ValueError(f'Refusing symlink in live configuration: {p}')
+    old_manifest = live/'packwiz.json'
+    if not old_manifest.exists():
+        raise ValueError('Existing server has no packwiz ownership manifest; reconcile manually')
+    removed = sorted(managed(old_manifest) - managed(staged/'packwiz.json'))
+    for rel in removed:
+        source = live/'config'/rel
+        if not source.resolve().is_relative_to(root):
+            raise ValueError('Retired config escaped root')
+        if source.is_file():
+            target = archive/rel
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if target.exists():
+                raise ValueError('Retired config archive already exists')
+            shutil.move(source, target)
+            print('Retired managed config:',rel)
+    return removed
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 4:
+        raise SystemExit('Usage: smp-retire-config <live server> <staged server> <retired archive>')
+    retire(*(Path(p) for p in sys.argv[1:]))

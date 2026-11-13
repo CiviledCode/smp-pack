@@ -1,0 +1,48 @@
+#!/bin/bash
+# Deploy an explicit reviewed commit, never an unpinned branch on service restart.
+set -euo pipefail
+umask 027
+revision=${1:-}
+[[ "$revision" =~ ^[0-9a-f]{40}$ ]] || { printf 'Usage: smp-update <full Git commit SHA>\n' >&2; exit 2; }
+exec 7>/run/lock/smp-deploy.lock
+flock -n 7 || { printf 'Another deployment is running\n' >&2; exit 1; }
+source_dir="/opt/minecraft/packs/$revision"
+stage="/opt/minecraft/staging/$revision"
+if [[ -e "$stage" || -e "$source_dir" ]]; then
+    printf 'This revision was already staged. Inspect it before retrying; no files were changed.\n' >&2
+    exit 1
+fi
+mkdir -p "$source_dir" "$stage"
+curl -fL --retry 3 "https://api.github.com/repos/CiviledCode/smp-pack/tarball/$revision" | tar -xz --strip-components=1 -C "$source_dir"
+cd "$stage"
+/usr/bin/java -jar /opt/minecraft/packwiz-installer-bootstrap.jar -g -s server "file://$source_dir/pack.toml"
+# Complete all downloads before downtime and retain a known-good rollback copy.
+/usr/local/sbin/smp-backup --local-only
+exec 9>/run/lock/smp-maintenance.lock
+flock -w 300 9
+/usr/local/sbin/smp-quiesce
+/usr/local/sbin/smp-retire-config /srv/minecraft "$stage" "/var/backups/minecraft/retired-config/$revision"
+printf '%s\n' "$revision" > "$stage/deployed-revision"
+rsync -a --delete "$stage/mods/" /srv/minecraft/mods/
+rsync -a "$stage/config/" /srv/minecraft/config/
+install -o minecraft -g minecraft -m 640 "$stage/packwiz.json" /srv/minecraft/packwiz.json
+install -o minecraft -g minecraft -m 640 "$stage/deployed-revision" /srv/minecraft/deployed-revision
+chown -R minecraft:minecraft /srv/minecraft/mods /srv/minecraft/config
+# Runtime/service/property changes require explicit operator review, not silent overwrites.
+systemctl start minecraft
+for attempt in $(seq 1 90); do
+    if ! systemctl is-active --quiet minecraft; then
+        printf 'Server stopped after update; inspect journalctl -u minecraft and restore the pre-update snapshot.\n' >&2
+        exit 1
+    fi
+    if /usr/local/sbin/smp-status 127.0.0.1 >/dev/null 2>&1; then
+        touch "$stage/.deployment-complete"
+        # Under both deployment and maintenance locks, bound reproducible caches.
+        /usr/local/sbin/smp-clean-cache "$revision"
+        printf 'Deployed %s; Minecraft status protocol is ready. Verify a real modded client join before announcing.\n' "$revision"
+        exit 0
+    fi
+    sleep 2
+done
+printf 'Startup health timeout: inspect journalctl -u minecraft before publishing clients.\n' >&2
+exit 1

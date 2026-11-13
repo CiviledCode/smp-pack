@@ -1,0 +1,61 @@
+#!/usr/bin/python3
+"""Probe the actual Minecraft status protocol, not just the TCP listener."""
+import json
+import socket
+import struct
+import sys
+
+
+def varint(number):
+    result = bytearray()
+    while True:
+        part = number & 0x7f
+        number >>= 7
+        result.append(part | (0x80 if number else 0))
+        if not number:
+            return bytes(result)
+
+
+def read_exact(stream, size):
+    result = bytearray()
+    while len(result) < size:
+        part = stream.recv(size - len(result))
+        if not part:
+            raise ValueError('Unexpected EOF')
+        result.extend(part)
+    return bytes(result)
+
+
+def read_varint(stream):
+    value = 0
+    for shift in range(0, 35, 7):
+        part = read_exact(stream, 1)[0]
+        value |= (part & 0x7f) << shift
+        if not part & 0x80:
+            return value
+    raise ValueError('Invalid VarInt')
+
+
+def status(host, port=25565):
+    with socket.create_connection((host, port), timeout=10) as stream:
+        stream.settimeout(10)
+        address = host.encode()
+        packet = b'\x00' + varint(763) + varint(len(address)) + address + struct.pack('>H', port) + b'\x01'
+        stream.sendall(varint(len(packet)) + packet + b'\x01\x00')
+        length = read_varint(stream)
+        if not 0 < length < 2**20:
+            raise ValueError('Invalid packet length')
+        if read_varint(stream) != 0:
+            raise ValueError('Unexpected packet type')
+        text_length = read_varint(stream)
+        if not 0 < text_length < length:
+            raise ValueError('Invalid JSON length')
+        return json.loads(read_exact(stream, text_length))
+
+
+if __name__ == '__main__':
+    result = status(sys.argv[1] if len(sys.argv) > 1 else 'mc.civiled.net')
+    if result['version']['protocol'] != 763:
+        raise SystemExit('Server is not Minecraft 1.20/1.20.1 protocol 763')
+    result.pop('favicon', None)
+    print(json.dumps(result, indent=2))

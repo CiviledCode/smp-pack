@@ -1,11 +1,11 @@
 name = "Server Performance - Smooth Chunk Save"
 filename = "smoothchunk-fabric-1.20.1-4.1.jar"
-side = "both"
+side = "server"
 
 [download]
 hash-format = "sha1"
 hash = "1136d8d1ebc37dc7754f22ebe7ee24ac91166ce3"
-mode = "metadata:curseforge"
+url = "https://edge.forgecdn.net/files/6296/630/smoothchunk-fabric-1.20.1-4.1.jar"
 
 [update]
 [update.curseforge]

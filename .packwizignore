@@ -1,0 +1,14 @@
+# Only game payload belongs in the pack index.
+.git
+.github
+.gitignore
+.packwizignore
+README.md
+docs
+scripts
+launcher
+server
+dist
+.agent-notes
+*.pyc
+__pycache__

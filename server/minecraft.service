@@ -1,0 +1,29 @@
+[Unit]
+Description=GRXM SMP Fabric Minecraft server
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=600
+StartLimitBurst=3
+
+[Service]
+Type=simple
+User=minecraft
+Group=minecraft
+WorkingDirectory=/srv/minecraft
+ExecStart=/usr/local/sbin/smp-start
+ExecStop=/usr/local/sbin/smp-console stop
+KillSignal=SIGTERM
+TimeoutStopSec=180
+SuccessExitStatus=0 130 143
+Restart=on-failure
+RestartSec=15
+UMask=0027
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/srv/minecraft
+LimitNOFILE=65535
+
+[Install]
+WantedBy=multi-user.target

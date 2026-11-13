@@ -1,0 +1,69 @@
+#!/bin/bash
+# Root-only restic credentials; failed uploads retain every pending local copy.
+set -euo pipefail
+export TZ=UTC
+umask 077
+exec 8>/run/lock/smp-offsite.lock
+flock -n 8 || exit 0
+base=${SMP_SNAPSHOT_ROOT:-/var/backups/minecraft/snapshots}
+backup_env=${SMP_BACKUP_ENV:-/etc/minecraft/backup.env}
+if [[ ! -s "$backup_env" ]]; then
+    printf 'Offsite backup pending: configure %s for Backblaze B2\n' "$backup_env" >&2
+    exit 1
+fi
+set -a
+source "$backup_env"
+set +a
+: "${RESTIC_REPOSITORY:?Missing RESTIC_REPOSITORY}"
+: "${RESTIC_PASSWORD_FILE:?Missing RESTIC_PASSWORD_FILE}"
+shopt -s nullglob
+pending=()
+for snapshot in "$base"/20*T*Z; do
+    if [[ -d "$snapshot" && ! -f "$snapshot/.uploaded" ]]; then
+        pending+=("$snapshot")
+    fi
+done
+if (( ${#pending[@]} == 0 )); then
+    printf 'No pending offsite snapshots; skipping remote requests\n'
+    exit 0
+fi
+# Explicit init is a separate operator step: never mistake auth/network failure for an empty repository.
+restic snapshots --json >/dev/null
+for snapshot in "${pending[@]}"; do
+    stamp=${snapshot##*/}
+    capture_time=$(python3 - "$stamp" <<'PY'
+from datetime import datetime
+import sys
+print(datetime.strptime(sys.argv[1],'%Y%m%dT%H%M%SZ').strftime('%Y-%m-%d %H:%M:%S'))
+PY
+)
+    restic backup --time "$capture_time" --host mc.civiled.net --tag minecraft --tag "$stamp" "$snapshot/server" "$snapshot/runtime"
+    # Bind readback to capture time, host, tags and exact paths before retention.
+    restic snapshots --json --tag "$stamp" > "$snapshot/.remote.json"
+    python3 - "$snapshot/.remote.json" "$snapshot" "$stamp" <<'PY'
+from datetime import datetime,timezone
+import json,sys
+items=json.load(open(sys.argv[1]))
+path,stamp=sys.argv[2:]
+expected=datetime.strptime(stamp,'%Y%m%dT%H%M%SZ').replace(tzinfo=timezone.utc)
+valid=[x for x in items if x.get('id') and x.get('hostname')=='mc.civiled.net'
+       and {'minecraft',stamp}.issubset(x.get('tags',[]))
+       and set(x.get('paths',[]))=={path+'/server',path+'/runtime'}
+       and datetime.fromisoformat(x['time'].replace('Z','+00:00'))==expected]
+if not valid:
+    raise SystemExit('Remote snapshot identity/capture-time readback failed')
+PY
+    touch "$snapshot/.uploaded"
+done
+# Retention only follows successful upload/readback; pending copies are never removed.
+restic forget --host mc.civiled.net --tag minecraft --group-by host --keep-daily 14 --keep-weekly 8 --keep-monthly 6 --prune
+python3 - "$base" <<'PY'
+from pathlib import Path
+import shutil,sys
+snapshots=sorted((p for p in Path(sys.argv[1]).glob('20*T*Z') if p.is_dir()),reverse=True)
+for p in snapshots[7:]:
+    if (p/'.uploaded').exists():
+        shutil.rmtree(p)
+PY
+restic check
+printf 'Offsite snapshots uploaded and repository metadata verified\n'

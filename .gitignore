@@ -1,0 +1,7 @@
+dist/
+.agent-notes/
+__pycache__/
+*.pyc
+*.log
+packwiz-installer*.jar
+packwiz.json

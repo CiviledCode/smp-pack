@@ -3,11 +3,11 @@ filename = "create_ultimate_factory-2.1.0-fabric-1.20.1.jar"
 side = "both"
 
 [download]
-hash-format = "sha1"
-hash = "f1821ea3471db0c94c80a0d485e6dcbe11a6407c"
-mode = "metadata:curseforge"
+url = "https://cdn.modrinth.com/data/N9QToVpw/versions/rqKE4xS1/create_ultimate_factory-2.1.0-fabric-1.20.1.jar"
+hash-format = "sha512"
+hash = "de9c27465f5b12266f7120735cde4fe9e9dfa2b44258ac1404cc7c54a3508698066b66b47119ac47d902df55da72a52e35174f6dcf65759c8652b5d01561a6c8"
 
 [update]
-[update.curseforge]
-file-id = 6588864
-project-id = 978125
+[update.modrinth]
+mod-id = "N9QToVpw"
+version = "rqKE4xS1"
