@@ -15,11 +15,10 @@ def verify(before, after, proof):
         raise ValueError('Minecraft stop was not a successful clean exit; snapshot refused')
     if proof.get('command') != 'stop' or not proof.get('invocation'):
         raise ValueError('Missing affirmative graceful-stop proof; snapshot refused')
-    if before.get('ActiveState') != 'inactive':
-        if proof['invocation'] != before.get('InvocationID') or proof['pid'] != int(before.get('MainPID', '0')):
-            raise ValueError('Graceful-stop proof does not match the stopped invocation')
-    elif proof['pid'] != int(after.get('ExecMainPID', '0')):
-        raise ValueError('Existing graceful-stop proof does not match the last process')
+    if before.get('ActiveState') not in {'active', 'activating'}:
+        raise ValueError('Cannot establish invocation identity for an already-stopped server; start Minecraft before snapshotting')
+    if proof['invocation'] != before.get('InvocationID') or proof['pid'] != int(before.get('MainPID', '0')):
+        raise ValueError('Graceful-stop proof does not match the stopped invocation')
 
 
 if __name__ == '__main__':

@@ -36,6 +36,10 @@ class SafetyTests(unittest.TestCase):
                 quiesce.verify(before,dict(clean,Result=result,ExecMainStatus=status),proof)
         with self.assertRaises(ValueError):
             quiesce.verify(before,clean,dict(proof,invocation='stale'))
+        # PID reuse/restored proof must never authorize an already-inactive unit.
+        for invocation in ['current','stale']:
+            with self.assertRaises(ValueError):
+                quiesce.verify(dict(before,ActiveState='inactive'),clean,dict(proof,invocation=invocation))
 
     def test_retired_config_moves_but_unmanaged_data_survives(self):
         with tempfile.TemporaryDirectory() as td:

@@ -1,6 +1,6 @@
 # Backups and recovery
 
-Minecraft is snapshotted every day at 12:00 UTC with up to five minutes of jitter. A backup sends the normal `stop` command, waits for all dimensions to save, and requires a successful process exit plus a clean-stop proof bound to that exact systemd invocation. A timeout, signal termination, or stale proof rejects the snapshot. It copies the complete server plus the small runtime recovery payload (launcher, bootstrap, and current pinned source), then restarts Minecraft before any cloud traffic. Reproducible deployment caches are excluded. This creates a short maintenance interruption rather than risking an inconsistent live copy. `minecraft-backup.timer` is persistent, so a missed schedule runs after boot.
+Minecraft is snapshotted every day at 12:00 UTC with up to five minutes of jitter. A backup sends the normal `stop` command, waits for all dimensions to save, and requires a successful process exit plus a clean-stop proof bound to that exact systemd invocation. A timeout, signal termination, or stale proof rejects the snapshot. An already-stopped server is rejected too because its prior invocation cannot be independently established; start Minecraft before requesting a consistent snapshot. It copies the complete server plus the small runtime recovery payload (launcher, bootstrap, and current pinned source), then restarts Minecraft before any cloud traffic. Reproducible deployment caches are excluded. This creates a short maintenance interruption rather than risking an inconsistent live copy. `minecraft-backup.timer` is persistent, so a missed schedule runs after boot.
 
 Local snapshots live at `/var/backups/minecraft/snapshots/<UTC timestamp>/server` and `runtime`. The original pre-first-boot world is also retained separately as `/var/backups/minecraft/original-world-before-first-boot.tar.gz`. These are root-readable and not publicly served. The original local `backups/7/world` is untouched.
 
@@ -33,6 +33,8 @@ restic check
 ```
 
 If `restic init` reports an existing repository, inspect it and confirm the password instead of deleting or recreating anything. The uploader never auto-initializes after an authentication/network error. Until these steps succeed, only local backups are active; a configured timer is not proof of off-site protection.
+
+Review B2 **Caps & Alerts** for download bandwidth and Class B transaction limits. Full restore tests can reach a low account cap even when uploads succeeded. `download_cap_exceeded` blocks repository reads/checks and therefore further uploads until the cap resets or the operator raises it; retries preserve local snapshots but cannot override provider limits. Choose limits and billing exposure yourself. Idle hourly retries make no remote requests when nothing is pending.
 
 ## Verify and restore
 
