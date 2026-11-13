@@ -502,7 +502,7 @@ metafile = true
 
 [[files]]
 file = "mods/grxm-teams.pw.toml"
-hash = "8fb8fb3eec030e1701ffe80729a5a468793c329e1890710da40516018c7b82c7"
+hash = "783a2abe66e1594af7449a364b340c8f5c999363fe8ff525ae9e442c0dfb7127"
 metafile = true
 
 [[files]]

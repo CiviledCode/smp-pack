@@ -102,8 +102,9 @@ public final class IntegrationDriver implements ModInitializer {
         if(phase.equals("damage-native")) {
             check(s.failure()==null,"Damage fixture begins with valid isolated bank");
             Path bank=server.getWorldPath(net.minecraft.world.level.storage.LevelResource.ROOT).resolve("data/numismatics_bank.dat");
-            var root=net.minecraft.nbt.NbtIo.readCompressed(bank.toFile());var invalid=new net.minecraft.nbt.ListTag();invalid.add(new net.minecraft.nbt.CompoundTag());root.getCompound("data").put("Accounts",invalid);
-            net.minecraft.nbt.NbtIo.writeCompressed(root,bank.toFile());Files.writeString(Path.of("grxmteams-integration-damage-native-CUT.txt"),"Malformed native account, intact teams envelope");Runtime.getRuntime().halt(23);return;
+            var root=net.minecraft.nbt.NbtIo.readCompressed(bank.toFile());var accounts=root.getCompound("data").getList("Accounts",10);accounts.add(new net.minecraft.nbt.CompoundTag());
+            if(Boolean.getBoolean("grxmteams.integration.damageLegacy")) { root.getCompound("data").remove("grxmteams");Files.delete(bank.resolveSibling("grxmteams-initialized.guard")); }
+            net.minecraft.nbt.NbtIo.writeCompressed(root,bank.toFile());Files.writeString(Path.of("grxmteams-integration-damage-native-CUT.txt"),"Malformed native account appended; legacy="+Boolean.getBoolean("grxmteams.integration.damageLegacy"));Runtime.getRuntime().halt(23);return;
         }
         if(phase.equals("recover-cut")) {
             var data=((GlobalBankManagerAccessor)Numismatics.BANK).grxmteams$savedData();var state=StateCodec.decode(((TeamDataAccess)data).grxmteams$getJson());

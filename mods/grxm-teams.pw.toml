@@ -5,4 +5,4 @@ side = "server"
 [download]
 url = "https://raw.githubusercontent.com/CiviledCode/smp-pack/v1.5/assets/mods/grxm-teams-1.0.0.jar"
 hash-format = "sha256"
-hash = "c3c60fec147203f1ddfdaa822507cc3914e90e514014fe7665bc975fdf77758b"
+hash = "9ebe5f4c111f3c9b78b9fff3b9a9735348a777c6f052ef5e193db12546035fbe"

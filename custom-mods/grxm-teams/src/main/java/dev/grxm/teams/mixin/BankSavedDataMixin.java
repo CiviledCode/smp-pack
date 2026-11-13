@@ -20,6 +20,9 @@ public abstract class BankSavedDataMixin implements TeamDataAccess {
     @Inject(method="load(Lnet/minecraft/server/MinecraftServer;)Ldev/ithundxr/createnumismatics/content/backend/BankSavedData;", at=@At("HEAD"), remap=false)
     private static void grxmteams$preflight(net.minecraft.server.MinecraftServer server, CallbackInfoReturnable<BankSavedData> cir) { BankPersistence.preflight(server); }
 
+    @Inject(method="load(Lnet/minecraft/server/MinecraftServer;)Ldev/ithundxr/createnumismatics/content/backend/BankSavedData;", at=@At("RETURN"), remap=false)
+    private static void grxmteams$verifyNativeLoad(net.minecraft.server.MinecraftServer server, CallbackInfoReturnable<BankSavedData> cir) { BankPersistence.verifyLoaded(cir.getReturnValue()); }
+
     // Both overloads deliberately match: only the NBT overload imports the attached document.
     @Inject(method="load", at=@At("RETURN"), remap=false)
     private static void grxmteams$read(@Coerce Object input, CallbackInfoReturnable<BankSavedData> cir) {
