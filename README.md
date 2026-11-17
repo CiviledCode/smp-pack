@@ -24,6 +24,8 @@ See [teams and the weekly bazaar](docs/economy.md) for player commands, placing/
 
 ## Maintain the pack
 
+**Release 1.5.1** updates BCLib 3.0.14 → 3.0.18, targeting its EMI hammer-recipe/global-registry error and related BCLib fixes, and adds server-only TimeOutOut 1.0.3 for 120-second network read/keepalive timeouts and a 2,400-tick login timeout. All other existing mod pins, including every Create artifact, remain unchanged. Client settings suppress BCLib/BetterX update checks and update screens plus Xaero World Map update notifications; curated packwiz updates remain enabled. The operator explicitly accepted deployment without staging gameplay validation; startup/status verification is not saved-world, automation, or multiplayer acceptance. See [release operation, timeout settings and rollback](docs/server.md#release-151). Existing normal Prism instances receive the update through packwiz on next launch; the separate offline staging ZIP does not auto-update.
+
 Install [packwiz](https://packwiz.infra.link/installation/) and Python 3.11+. Edit metadata through packwiz or adjust files under `config/`, then refresh and verify:
 
 ```sh
