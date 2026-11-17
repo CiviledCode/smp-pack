@@ -1,0 +1,13 @@
+name = "Icy's Better Horses"
+filename = "icys-better-horses-2.1.8-fab-1.20.1.jar"
+side = "both"
+
+[download]
+url = "https://cdn.modrinth.com/data/XlUm5I57/versions/WawWpmlE/icys-better-horses-2.1.8-fab-1.20.1.jar"
+hash-format = "sha512"
+hash = "3186f764fd5d66b9e34b74cd43e84d70f7c037ca95c543a8aa7e5feef87cb5376071a388a1ad172a8bd12e482ea92e771150597b2c146df1a9557bd09b6b6d75"
+
+[update]
+[update.modrinth]
+mod-id = "XlUm5I57"
+version = "WawWpmlE"

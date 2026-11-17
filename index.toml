@@ -145,6 +145,10 @@ file = "config/emi.css"
 hash = "81f62b5dcf508a171ccb2013642564eba7d892e612ccd481ce9299261acff0d8"
 
 [[files]]
+file = "config/euphoria_patcher/settings.toml"
+hash = "cefb93c0e077d70049532daff755efc91ccf09143eba6639b2dc1585c5d01c2f"
+
+[[files]]
 file = "config/fabric/indigo-renderer.properties"
 hash = "3a701e84bd11fda38b849f76ebfef500b3de516b1aa4100b0abf36503087b0cb"
 
@@ -420,6 +424,11 @@ hash = "ed7057766c3e723dfaf4627ee8b90ab6b611f038f60b2b15feebb038971d3a66"
 metafile = true
 
 [[files]]
+file = "mods/coolrain.pw.toml"
+hash = "e9dc56385abbcddd52dd4fe5b59aef354c363d6353ff3d8d271ee9b1624815f5"
+metafile = true
+
+[[files]]
 file = "mods/cosy-critters.pw.toml"
 hash = "2befc56b9ae0b3d163a04af23830a35c936796de92c7bde5016f517ebb9bac04"
 metafile = true
@@ -450,6 +459,11 @@ hash = "b6cc3e5c02fbb99405760e5706bc8540129a7d15b8e427e9c5dc86b120fad537"
 metafile = true
 
 [[files]]
+file = "mods/dark-loading-screen.pw.toml"
+hash = "5f7537e9f19357e3a5bcc077725f15a1694fb9f67c4cdfd96f3b993a85e397f1"
+metafile = true
+
+[[files]]
 file = "mods/delightful-creators-fabric.pw.toml"
 hash = "8bbfe44f699261ed4f1bec57aca21666bba0f3d2176ccb2a26924ddac8bd86ce"
 metafile = true
@@ -467,6 +481,11 @@ metafile = true
 [[files]]
 file = "mods/entityculling.pw.toml"
 hash = "08c04ff3bf9027f3f48181b14cba1adbe27d60a46dda005cd3219e9083221dba"
+metafile = true
+
+[[files]]
+file = "mods/euphoria-patches.pw.toml"
+hash = "93c14684652eae26a5015d4b2663403d5384bcd63e0b196ec042b56cea725a86"
 metafile = true
 
 [[files]]
@@ -500,8 +519,18 @@ hash = "03bce6cae23208c1042b767bff9ded810ca8a471fb4ca2bca69d8484fce2a950"
 metafile = true
 
 [[files]]
+file = "mods/geckolib.pw.toml"
+hash = "930bb7150387995f4764a33a41bc1dde3f0e977c0432010e96ea2076fcf6d85d"
+metafile = true
+
+[[files]]
 file = "mods/glitchcore.pw.toml"
 hash = "7d60672df0dff49d05b7979ecfb7ba7cb4d43dd7abd048868cb5667a3b04090e"
+metafile = true
+
+[[files]]
+file = "mods/grassier-grass.pw.toml"
+hash = "4f507ab93d6687abd818fb2669de77d6e94ac290e2fcbff0b7f9a71321f4897a"
 metafile = true
 
 [[files]]
@@ -512,6 +541,11 @@ metafile = true
 [[files]]
 file = "mods/handcrafted.pw.toml"
 hash = "fa8cf971776ad38e2ccca64ab565f75e1acb73e64ab479d14bfb08fc1a07104c"
+metafile = true
+
+[[files]]
+file = "mods/icys-better-horses.pw.toml"
+hash = "3da3a6ffecc4de25ff3c970d14a3f77e102a44753465d4a671000aa706f22086"
 metafile = true
 
 [[files]]
@@ -660,6 +694,16 @@ hash = "42859a2f6ae73df9cfc4ffdb4d7906ddfc715564d104d8f2831bc69ca7dd0d79"
 metafile = true
 
 [[files]]
+file = "mods/wakes.pw.toml"
+hash = "24cfa457173f8fd0aec773a4437c86dc22a9ef41c73514a2237160b514ff837d"
+metafile = true
+
+[[files]]
+file = "mods/windy.pw.toml"
+hash = "dcf90975dc5b29f3dbbd1f17892133aed422cd8a7f7c61cc3d414ce82faa6b58"
+metafile = true
+
+[[files]]
 file = "mods/wthit.pw.toml"
 hash = "2ec043d87a6ff41e5a49a34b648e96abc8ac42e21b921ad8f755634703a1b3ba"
 metafile = true
@@ -667,6 +711,11 @@ metafile = true
 [[files]]
 file = "mods/xaeros-world-map.pw.toml"
 hash = "4feafce973c1af263ca9748578759a736f6b0a7757cd4f4f0be6c2c9eb07235c"
+metafile = true
+
+[[files]]
+file = "mods/yacl.pw.toml"
+hash = "3cbc56c741e6ac05d2f814af5e4f30d171e371c0244be476a1a188dd9f5611bf"
 metafile = true
 
 [[files]]

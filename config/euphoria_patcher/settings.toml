@@ -1,0 +1,3 @@
+# Updates are managed by the curated packwiz manifest, not in-game prompts.
+[updates]
+doUpdateChecking = "none"

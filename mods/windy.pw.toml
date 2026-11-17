@@ -1,0 +1,13 @@
+name = "Windy"
+filename = "windy-1.1.1+1.20-fabric.jar"
+side = "client"
+
+[download]
+url = "https://cdn.modrinth.com/data/EwYg6C78/versions/h8t44pww/windy-1.1.1%2B1.20-fabric.jar"
+hash-format = "sha512"
+hash = "6450c24cc35b3f7fab4505030b6e5745e278c3703f2eb772e8b6b0b7ca06355ad3eb476caa31cf03dad1f7edb87d5b03bd304d72a9b3ec5c1e72cfddd8eb6d94"
+
+[update]
+[update.modrinth]
+mod-id = "EwYg6C78"
+version = "h8t44pww"

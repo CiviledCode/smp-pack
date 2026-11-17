@@ -9,3 +9,4 @@ custom-mods/**/.gradle/
 custom-mods/**/.tools/
 custom-mods/**/build/
 custom-mods/**/run/
+docs/
