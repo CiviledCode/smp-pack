@@ -24,6 +24,41 @@ public final class TeamsMod implements ModInitializer {
         TeamsConfig old=holder.getConfig();
         try { if(!holder.load())throw new IllegalArgumentException("AutoConfig rejected configuration; previous settings retained"); TeamsConfig candidate=holder.getConfig(); candidate.validate(); service().reload(candidate); }
         catch(RuntimeException e) { holder.setConfig(old); throw e; }
+        requireAppliedConfiguration();
+    }
+    private static void requireAppliedConfiguration() {
+        if(service().failure()!=null)throw new IllegalStateException("Configuration saved, but Teams is quarantined: "+service().failure()+". Settings were retained; operator recovery is required before further changes. Do not retry financial actions.");
+    }
+    /** Server-thread, optimistic configuration edit; failed validation leaves live settings and disk intact. */
+    public static void saveConfiguration(TeamsConfig candidate,String expectedJson) {
+        service().ready();
+        if(!StateCodec.GSON.toJson(service().configuration()).equals(expectedJson))throw new IllegalArgumentException("Configuration changed; reopen editor");
+        candidate=StateCodec.GSON.fromJson(StateCodec.GSON.toJson(candidate),TeamsConfig.class);
+        candidate.validate();
+        java.nio.file.Path path=net.fabricmc.loader.api.FabricLoader.getInstance().getConfigDir().resolve("grxmteams.json");
+        java.nio.file.Path staged=null;
+        byte[] previous=null; boolean existed=false, replaced=false;
+        try {
+            existed=java.nio.file.Files.exists(path); if(existed)previous=java.nio.file.Files.readAllBytes(path);
+            staged=java.nio.file.Files.createTempFile(path.getParent(),"grxmteams-",".json");
+            java.nio.file.Files.writeString(staged,new com.google.gson.GsonBuilder().setPrettyPrinting().create().toJson(candidate));
+            java.nio.file.Files.move(staged,path,java.nio.file.StandardCopyOption.ATOMIC_MOVE,java.nio.file.StandardCopyOption.REPLACE_EXISTING); replaced=true;
+            try { service().reload(candidate); }
+            catch(RuntimeException failure) {
+                // Reconciliation may already have committed debits. Do not roll its settings back.
+                if(service().failure()!=null && StateCodec.GSON.toJson(service().configuration()).equals(StateCodec.GSON.toJson(candidate))) {
+                    holder.setConfig(candidate);
+                    requireAppliedConfiguration();
+                }
+                if(existed) { java.nio.file.Files.write(staged,previous); java.nio.file.Files.move(staged,path,java.nio.file.StandardCopyOption.ATOMIC_MOVE,java.nio.file.StandardCopyOption.REPLACE_EXISTING); }
+                else java.nio.file.Files.deleteIfExists(path);
+                throw failure;
+            }
+            holder.setConfig(candidate);
+        } catch(java.io.IOException e) {
+            throw new IllegalStateException(replaced?"Configuration I/O failure after replacement; inspect disk before retrying":"Configuration was not saved",e);
+        } finally { if(staged!=null)try { java.nio.file.Files.deleteIfExists(staged); }catch(java.io.IOException e){LOGGER.warn("Unable to remove staged configuration",e);} }
+        requireAppliedConfiguration();
     }
     @Override public void onInitialize() {
         AutoConfig.register(TeamsConfig.class,GsonConfigSerializer::new); holder=AutoConfig.getConfigHolder(TeamsConfig.class);

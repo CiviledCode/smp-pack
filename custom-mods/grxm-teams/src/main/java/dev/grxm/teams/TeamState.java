@@ -4,7 +4,8 @@ import java.util.*;
 
 /** Versioned durable model, serialized only inside Numismatics' bank NBT. */
 public final class TeamState {
-    public int version = 2;
+    public int version = 3;
+    public CashState cash = new CashState();
     public Map<UUID, Team> teams = new LinkedHashMap<>();
     public BazaarState bazaar = new BazaarState();
     public enum Role { OWNER, OFFICER, MEMBER }
@@ -16,6 +17,7 @@ public final class TeamState {
     public static final class Team {
         public UUID id, account;
         public String name, color, badge;
+        public String inviteCode; // Null in legacy state; assigned on the next invitation/code lookup.
         public Map<UUID,Role> members = new LinkedHashMap<>();
         public Map<UUID,Long> invites = new LinkedHashMap<>();
         public Set<Chunk> chunks = new LinkedHashSet<>();
@@ -38,12 +40,15 @@ public final class TeamState {
     public Team member(UUID id) { return teams.values().stream().filter(t->t.members.containsKey(id)).findFirst().orElseThrow(()->new IllegalArgumentException("You are not in a team")); }
     public Team byId(UUID id) { Team t=teams.get(id); if(t==null)throw new IllegalArgumentException("Unknown team"); return t; }
     public void validate() {
-        if(version!=2 || teams==null || teams.size()>10000) throw new IllegalArgumentException("Unsupported/corrupt team state");
+        if(version!=3 || teams==null || teams.size()>10000) throw new IllegalArgumentException("Unsupported/corrupt team state");
         if(bazaar==null)throw new IllegalArgumentException("Missing bazaar"); bazaar.validate();
-        Set<UUID> members=new HashSet<>(), accounts=new HashSet<>(); Set<Chunk> chunks=new HashSet<>(); Set<String> names=new HashSet<>();
+        if(cash==null)throw new IllegalArgumentException("Missing cash aggregate"); cash.validate();
+        for(var t:cash.journal.values())if(bazaar.journal.containsKey(t.id)||!t.committed&&bazaar.journal.values().stream().anyMatch(s->s.player.equals(t.player)&&!s.committed))throw new IllegalArgumentException("Conflicting cash/bazaar transaction");
+        Set<UUID> members=new HashSet<>(), accounts=new HashSet<>(); Set<Chunk> chunks=new HashSet<>(); Set<String> names=new HashSet<>(), codes=new HashSet<>();
         teams.forEach((id,t)->{
             if(id==null || t==null || !id.equals(t.id) || t.account==null || t.account.equals(id) || !accounts.add(t.account)) throw new IllegalArgumentException("Invalid team/account identity");
             TeamsConfig.plain(t.name,48);
+            if(t.inviteCode!=null && (!t.inviteCode.matches("[A-Z]{6}") || !codes.add(t.inviteCode)))throw new IllegalArgumentException("Invalid/duplicate invitation code");
             if(t.name.isBlank() || !names.add(t.name.toLowerCase(Locale.ROOT)) || t.color==null || t.badge==null || !t.color.matches("[a-z_]{1,24}") || !t.badge.matches("[a-z0-9_-]{1,24}") || t.members==null || t.members.isEmpty() || t.members.size()>1000 || t.invites==null || t.invites.size()>10000 || t.chunks==null || t.chunks.size()>4096) throw new IllegalArgumentException("Invalid team data");
             if(t.members.values().stream().filter(r->r==Role.OWNER).count()!=1) throw new IllegalArgumentException("Team must have exactly one owner");
             t.members.forEach((u,r)->{if(u==null||r==null||!members.add(u)) throw new IllegalArgumentException("Invalid/duplicate membership");});

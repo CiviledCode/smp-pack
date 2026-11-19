@@ -2,7 +2,7 @@ plugins {
     id 'fabric-loom' version '1.9.2'
     id 'maven-publish'
 }
-version = '1.0.0'
+version = '1.1.0'
 group = 'dev.grxm'
 base { archivesName = 'grxm-teams' }
 repositories { mavenCentral(); maven { url = 'https://maven.shedaniel.me/' }; maven { url = 'https://api.modrinth.com/maven' } }

@@ -18,6 +18,9 @@ public class TeamsConfig implements ConfigData {
         public PoolEntry(String id) { itemId=id; }
     }
     public static class Bazaar {
+        // Bound selection work and packet-only display entities (two per nearby counter/viewer).
+        // Slots are one-based offer indices, not chest-menu positions; no GUI slot limit applies.
+        public static final int MAX_OFFERS=256, MAX_COUNTERS=256;
         public boolean enabled=false, payPersonal=false;
         public int offerCount=3, journalCapacity=2048;
         public double bindReach=6;
@@ -31,13 +34,14 @@ public class TeamsConfig implements ConfigData {
         public java.util.List<PoolEntry> pool=new ArrayList<>();
         public Bazaar() { for(String id:List.of("nether_star","end_rod","shulker_shell","wither_skeleton_skull","ancient_debris","diamond","emerald","bone_block","iron_block"))pool.add(new PoolEntry("minecraft:"+id)); }
         public void validate() {
-            if(offerCount<2||offerCount>3||periodSeconds<1||periodSeconds>31536000||epochSeconds<0||epochSeconds>31536000||journalCapacity<1||journalCapacity>4096||!Double.isFinite(bindReach)||bindReach<1||bindReach>8)throw new IllegalArgumentException("Invalid bazaar limits");
+            if(offerCount<1||offerCount>MAX_OFFERS)throw new IllegalArgumentException("Bazaar offerCount must be 1.."+MAX_OFFERS);
+            if(periodSeconds<1||periodSeconds>31536000||epochSeconds<0||epochSeconds>31536000||journalCapacity<1||journalCapacity>4096||!Double.isFinite(bindReach)||bindReach<1||bindReach>8)throw new IllegalArgumentException("Invalid bazaar limits");
             if(!"spurs".equals(denomination))throw new IllegalArgumentException("Bazaar prices are native spurs, not a convertible display denomination");
             if(displayRadius<8||displayRadius>64||displayRefreshTicks<10||displayRefreshTicks>100||!Double.isFinite(itemHeight)||!Double.isFinite(textHeight)||itemHeight<.5||itemHeight>4||textHeight<1||textHeight>6)throw new IllegalArgumentException("Invalid display limits");
             if(displayText==null||displayText.length()>1024)throw new IllegalArgumentException("Invalid display text");for(String line:displayText.split("\\n",-1))plain(line,256);
             plain(noTeamText,128);plain(closedText,128);plain(inactiveText,128);
             plain(denomination,64); plain(title,64);
-            if(pool==null||pool.size()>256)throw new IllegalArgumentException("Invalid pool");
+            if(pool==null||pool.size()>MAX_OFFERS)throw new IllegalArgumentException("Bazaar pool must contain at most "+MAX_OFFERS+" entries");
             Set<String> ids=new HashSet<>(); int positive=0;
             for(PoolEntry e:pool) {
                 if(e==null||e.itemId==null||!e.itemId.matches("[a-z0-9_.-]+:[a-z0-9/._-]+")||!ids.add(e.itemId)||e.minItemCount<1||e.maxItemCount<e.minItemCount||e.maxItemCount>1000000||e.minItemPrice<1||e.maxItemPrice<e.minItemPrice||!Double.isFinite(e.rarityWeight)||e.rarityWeight<0||e.rarityWeight>1000000)throw new IllegalArgumentException("Invalid bazaar pool entry");

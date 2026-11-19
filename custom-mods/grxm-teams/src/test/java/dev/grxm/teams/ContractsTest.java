@@ -18,12 +18,56 @@ class ContractsTest {
         assertTrue(heavy>950,"Weight changes inclusion likelihood, not retry-based duplicate bias");
         c.pool.get(0).rarityWeight=Double.NaN;assertThrows(IllegalArgumentException.class,c::validate);
     }
+    @Test void flexibleOfferCountsRespectPositiveUniquePoolAndTechnicalCap() {
+        var c=config().bazaar;
+        c.offerCount=1;assertEquals(1,BazaarState.roll(c,new Random(3)).size());
+        c.pool.clear();
+        for(int n=0;n<TeamsConfig.Bazaar.MAX_OFFERS;n++)c.pool.add(new TeamsConfig.PoolEntry("minecraft:test_"+n));
+        c.offerCount=TeamsConfig.Bazaar.MAX_OFFERS;
+        var offers=BazaarState.roll(c,new Random(4));
+        assertEquals(c.offerCount,offers.size());assertEquals(c.offerCount,offers.stream().map(BazaarState.Offer::itemId).distinct().count());
+        c.pool.get(0).rarityWeight=0;assertThrows(IllegalArgumentException.class,c::validate);
+        c.pool.get(0).rarityWeight=1;c.offerCount++;assertThrows(IllegalArgumentException.class,c::validate);
+        c.offerCount=0;assertThrows(IllegalArgumentException.class,c::validate);
+    }
+    @Test void highCounterQuotaAndHistoricalSaleIndicesRoundTripWithoutTruncation() {
+        var s=new TeamState();var m=s.bazaar;UUID team=UUID.randomUUID();
+        m.generation=7;m.start=1000;m.end=2000;
+        var c=config().bazaar;c.pool.clear();
+        for(int n=0;n<TeamsConfig.Bazaar.MAX_OFFERS;n++)c.pool.add(new TeamsConfig.PoolEntry("minecraft:test_"+n));
+        c.offerCount=TeamsConfig.Bazaar.MAX_OFFERS;m.offers=BazaarState.roll(c,new Random(5));
+        for(int n=1;n<=TeamsConfig.Bazaar.MAX_COUNTERS;n++)m.counters.put(n,new BazaarState.Counter("minecraft:overworld",n,64,0,"numismatics:vendor"));
+        String key=BazaarState.key(team,7,255);m.used.put(key,12);
+        var sale=new BazaarState.Sale();sale.id=UUID.randomUUID();sale.player=UUID.randomUUID();sale.team=team;sale.account=UUID.randomUUID();
+        sale.generation=6;sale.offer=255;sale.count=2;sale.unitPrice=3;sale.payout=6;sale.balanceBefore=10;sale.itemId="minecraft:diamond";
+        sale.beforeInventory="before";sale.afterInventory="after";sale.receipt="a".repeat(64);sale.committed=true;m.journal.put(sale.id,sale);
+        var round=StateCodec.decode(StateCodec.encode(s)).bazaar;
+        assertEquals(m.offers,round.offers);assertEquals(m.counters,round.counters);assertEquals(12,round.used.get(key));assertEquals(255,round.journal.get(sale.id).offer);
+        // A smaller next generation must not invalidate the journal's frozen old offer index.
+        m.offers=new ArrayList<>(m.offers.subList(0,1));m.validate();
+        m.used.put(BazaarState.key(team,7,256),1);assertThrows(IllegalArgumentException.class,m::validate);m.used.remove(BazaarState.key(team,7,256));
+        m.used.put(team+"/7/025",1);assertThrows(IllegalArgumentException.class,m::validate);m.used.remove(team+"/7/025");
+        sale.offer=256;assertThrows(IllegalArgumentException.class,m::validate);sale.offer=255;
+        m.counters.put(257,new BazaarState.Counter("minecraft:overworld",257,64,0,"minecraft:stone"));assertThrows(IllegalArgumentException.class,m::validate);
+    }
+    @Test void activeTermsAndLegacySlotsSurviveReloadedNextPeriodConfiguration() {
+        var s=new TeamState();var m=s.bazaar;m.generation=3;m.start=1000;m.end=2000;m.offers=BazaarState.roll(config().bazaar,new Random(6));
+        UUID team=UUID.randomUUID();String key=BazaarState.key(team,3,2);m.used.put(key,17);
+        m.counters.put(3,new BazaarState.Counter("minecraft:overworld",0,64,0,"minecraft:barrel"));
+        var next=config().bazaar;next.offerCount=1;next.periodSeconds=60;next.pool.get(0).minItemPrice=100;next.pool.get(0).maxItemPrice=100;next.validate();
+        var round=StateCodec.decode(StateCodec.encode(s)).bazaar;
+        assertEquals(m.offers,round.offers);assertEquals(m.used,round.used);assertEquals(m.counters,round.counters);
+        assertFalse(round.rotationDue(999));assertFalse(round.rotationDue(1999));assertTrue(round.rotationDue(2000));
+        assertEquals(1,BazaarState.roll(next,new Random(7)).size());
+        assertTrue(new BazaarState().rotationDue(0));
+        assertEquals(3,StateCodec.decode("{\"version\":1,\"teams\":{}}").version);
+    }
     @Test void persistedMarketAndJournalCannotBeSilentlyDefaultedOrTruncated() {
         var s=new TeamState();s.bazaar.generation=3;s.bazaar.start=1000;s.bazaar.end=2000;s.bazaar.offers=BazaarState.roll(config().bazaar,new Random(2));
         String json=StateCodec.encode(s);assertEquals(s.bazaar.offers,StateCodec.decode(json).bazaar.offers);
         var root=com.google.gson.JsonParser.parseString(json).getAsJsonObject();root.getAsJsonObject("bazaar").remove("journal");assertThrows(IllegalArgumentException.class,()->StateCodec.decode(root.toString()));
         var sale=new BazaarState.Sale();s.bazaar.journal.put(UUID.randomUUID(),sale);assertThrows(IllegalArgumentException.class,s::validate);
-        assertEquals(2,StateCodec.decode("{\"version\":1,\"teams\":{}}").version);
+        assertEquals(3,StateCodec.decode("{\"version\":1,\"teams\":{}}").version);
     }
     @Test void totalIsOneRoundedTeamBillNotPerChunkRounding() {
         var c=config(); c.billing.scalingFactor="0.1"; c.billing.teamMemberScaling="0.3";

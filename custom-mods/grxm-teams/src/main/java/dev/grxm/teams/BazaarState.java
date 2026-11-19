@@ -20,15 +20,21 @@ public final class BazaarState {
     }
     public static String key(UUID team,long generation,int offer) { return team+"/"+generation+"/"+offer; }
     public void validate() {
-        if(generation<0||start<0||end<0||generation>0&&end<=start||offers==null||offers.size()>3||counters==null||counters.size()>3||used==null||used.size()>30000||journal==null||journal.size()>4096)throw new IllegalArgumentException("Invalid bazaar state");
+        if(generation<0||start<0||end<0||generation>0&&end<=start||offers==null||offers.size()>TeamsConfig.Bazaar.MAX_OFFERS||counters==null||counters.size()>TeamsConfig.Bazaar.MAX_COUNTERS||used==null||used.size()>30000||journal==null||journal.size()>4096)throw new IllegalArgumentException("Invalid bazaar state");
         TeamsConfig.plain(denomination,64); Set<String> ids=new HashSet<>();
         for(Offer o:offers)if(o==null||o.itemId()==null||!o.itemId().matches("[a-z0-9_.-]+:[a-z0-9/._-]+")||!ids.add(o.itemId())||o.unitPrice()<1||o.quota()<1||(long)o.unitPrice()*o.quota()>Integer.MAX_VALUE)throw new IllegalArgumentException("Invalid offer");
-        counters.forEach((slot,c)->{if(slot==null||slot<1||slot>3||c==null||c.dimension()==null||c.blockId()==null||c.y() < -2048||c.y()>2048||Math.abs((long)c.x())>30000000||Math.abs((long)c.z())>30000000)throw new IllegalArgumentException("Invalid counter");});
-        used.forEach((k,n)->{if(k==null||!k.matches("[0-9a-f-]{36}/[0-9]+/[0-2]")||n==null||n<0)throw new IllegalArgumentException("Invalid quota usage");});
+        counters.forEach((slot,c)->{if(slot==null||slot<1||slot>TeamsConfig.Bazaar.MAX_COUNTERS||c==null||c.dimension()==null||c.blockId()==null||c.y() < -2048||c.y()>2048||Math.abs((long)c.x())>30000000||Math.abs((long)c.z())>30000000)throw new IllegalArgumentException("Invalid counter");});
+        used.forEach((k,n)->{if(!validUsageKey(k)||n==null||n<0)throw new IllegalArgumentException("Invalid quota usage");});
         journal.forEach((id,s)->{
-            if(s==null||!id.equals(s.id)||s.player==null||s.team==null||s.account==null||s.generation<1||s.offer<0||s.offer>2||s.count<1||s.unitPrice<1||s.payout!=(long)s.count*s.unitPrice||s.balanceBefore<0||(long)s.balanceBefore+s.payout>Integer.MAX_VALUE||s.itemId==null||s.beforeInventory==null||s.afterInventory==null||s.receipt==null||!s.receipt.matches("[0-9a-f]{64}"))throw new IllegalArgumentException("Invalid sale proof");
+            if(s==null||!id.equals(s.id)||s.player==null||s.team==null||s.account==null||s.generation<1||s.offer<0||s.offer>=TeamsConfig.Bazaar.MAX_OFFERS||s.count<1||s.unitPrice<1||s.payout!=(long)s.count*s.unitPrice||s.balanceBefore<0||(long)s.balanceBefore+s.payout>Integer.MAX_VALUE||s.itemId==null||s.beforeInventory==null||s.afterInventory==null||s.receipt==null||!s.receipt.matches("[0-9a-f]{64}"))throw new IllegalArgumentException("Invalid sale proof");
         });
     }
+    private static boolean validUsageKey(String key) {
+        if(key==null||!key.matches("[0-9a-f-]{36}/[0-9]+/(0|[1-9][0-9]{0,2})"))return false;
+        return Integer.parseInt(key.substring(key.lastIndexOf('/')+1))<TeamsConfig.Bazaar.MAX_OFFERS;
+    }
+    /** Persisted terms survive config reloads and backward clock jumps until their own end. */
+    public boolean rotationDue(long now) { return generation==0||now>=end; }
     public static List<Offer> roll(TeamsConfig.Bazaar c,Random random) {
         c.validate(); List<TeamsConfig.PoolEntry> pool=new ArrayList<>(c.pool.stream().filter(e->e.rarityWeight>0).toList()); List<Offer> out=new ArrayList<>();
         for(int i=0;i<c.offerCount;i++) {

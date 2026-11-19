@@ -529,13 +529,8 @@ hash = "7d60672df0dff49d05b7979ecfb7ba7cb4d43dd7abd048868cb5667a3b04090e"
 metafile = true
 
 [[files]]
-file = "mods/grassier-grass.pw.toml"
-hash = "4f507ab93d6687abd818fb2669de77d6e94ac290e2fcbff0b7f9a71321f4897a"
-metafile = true
-
-[[files]]
 file = "mods/grxm-teams.pw.toml"
-hash = "783a2abe66e1594af7449a364b340c8f5c999363fe8ff525ae9e442c0dfb7127"
+hash = "a731f108e615b44748ed805f3167d53ccb3b9e503eb2ddd2e7e703bdd3e50557"
 metafile = true
 
 [[files]]

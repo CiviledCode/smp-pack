@@ -5,12 +5,14 @@
 .gitignore
 .packwizignore
 README.md
+issues.txt
 docs
 scripts
 launcher
 assets
 server
 custom-mods
+optional-mods
 dist
 .agent-notes
 *.pyc

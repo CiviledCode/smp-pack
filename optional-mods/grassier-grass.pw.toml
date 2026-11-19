@@ -2,6 +2,11 @@ name = "Grassier Grass"
 filename = "grassiergrass-fabric-1.4.5+mc1.20.1.jar"
 side = "client"
 
+[option]
+optional = true
+default = false
+description = "Optional dense grass renderer. Disable for AMD square vegetation or excessive rendering cost; vanilla vegetation remains available."
+
 [download]
 url = "https://cdn.modrinth.com/data/3jCB9cn2/versions/k5jm0tqS/grassiergrass-fabric-1.4.5%2Bmc1.20.1.jar"
 hash-format = "sha512"

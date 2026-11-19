@@ -1,15 +1,17 @@
 #!/usr/bin/env python3
 """Clone a marked isolated pack template, never its world. Run Java 17 phases.
-Usage: integration_suite.py TEMPLATE SCRATCH_ROOT [seed|bazaar|cuts|all]
+Usage: integration_suite.py TEMPLATE SCRATCH_ROOT [seed|random|bazaar|cuts|failure|all]
 TEMPLATE must contain grxmteams-integration-ALLOW. Output dirs must not exist.
 """
 import pathlib, shutil, subprocess, sys, json, os
+from fixture_runtime import verify_template_runtime, runtime_is_pinned
 TEMPLATE=pathlib.Path(sys.argv[1]).resolve(); ROOT=pathlib.Path(sys.argv[2]).resolve()
 MODE=sys.argv[3] if len(sys.argv)>3 else 'all'
 PORT=int(os.environ.get('GRXM_TEST_PORT','25589'));assert 1024<=PORT<=65000
 assert (TEMPLATE/'grxmteams-integration-ALLOW').is_file(), 'not an isolated template'
+verify_template_runtime(TEMPLATE)
 assert not ROOT.exists(), 'output must be a fresh directory'
-assert MODE in ('seed','bazaar','cuts','failure','all'), 'unknown phase group'
+assert MODE in ('seed','random','bazaar','cuts','failure','all'), 'unknown phase group'
 assert ROOT.is_relative_to(pathlib.Path(os.environ.get('TMPDIR','/home/civ/.hermes/cache/scratch')).resolve()), 'output must be scratch'
 MOD=pathlib.Path(__file__).resolve().parents[1]
 JAVA=os.environ.get('JAVA17','/usr/lib/jvm/java-17-openjdk-amd64/bin/java')
@@ -32,7 +34,7 @@ def fixture(name):
     (out/'grxmteams-integration-ALLOW').touch();(out/'mods').mkdir()
     for p in (TEMPLATE/'mods').glob('*.jar'):
         if 'grxm-teams' not in p.name:(out/'mods'/p.name).symlink_to(p.resolve())
-    for n in ('grxm-teams-1.0.0.jar','grxm-teams-1.0.0-integration-test.jar'):
+    for n in ('grxm-teams-1.1.0.jar','grxm-teams-1.1.0-integration-test.jar'):
         shutil.copy2(MOD/'build/libs'/n,out/'mods'/n)
     return out
 summary=[]
@@ -42,9 +44,15 @@ def run(out,phase,cut=False):
         p=subprocess.run([JAVA,'-Xms512M','-Xmx3G','-Dgrxmteams.integration=true','-Dgrxmteams.integration.phase='+phase,'-jar','fabric-server.jar','nogui'],cwd=out,stdout=f,stderr=subprocess.STDOUT,timeout=300)
     fail=out/'grxmteams-integration-FAIL.txt'
     proof=out/('grxmteams-integration-'+phase+('-CUT.txt' if cut else '-PASS.txt'))
-    result={'directory':str(out),'phase':phase,'exit':p.returncode,'proof':proof.read_text() if proof.exists() else None,'fail':fail.read_text() if fail.exists() else None}
+    # TextDisplay's 1.20.1 loader silently defaults a missing alignment but logs a codec error.
+    # The bazaar phase exercises actual display creation; reject that known malformed-NBT path.
+    display_error=phase=='bazaar' and 'Display entityNot a string' in log.read_text(errors='replace')
+    pinned=runtime_is_pinned(log)
+    result={'directory':str(out),'phase':phase,'exit':p.returncode,'proof':proof.read_text() if proof.exists() else None,'fail':fail.read_text() if fail.exists() else None,'display_codec_error':display_error,'runtime_pinned':pinned}
     summary.append(result);(ROOT/'results.json').write_text(json.dumps(summary,indent=2));print(json.dumps(result),flush=True)
-    if p.returncode!=(23 if cut else 0) or not proof.exists() or fail.exists():raise SystemExit('FAILED: '+str(log))
+    if p.returncode!=(23 if cut else 0) or not proof.exists() or fail.exists() or display_error or not pinned:raise SystemExit('FAILED: '+str(log))
+if MODE in ('random','all'):
+    out=fixture('random');run(out,'random')
 if MODE in ('seed','all'):
     out=fixture('rent');run(out,'seed');run(out,'verify');run(out,'expire')
 if MODE in ('bazaar','all'):

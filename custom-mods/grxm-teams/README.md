@@ -12,31 +12,49 @@ Teams, graphical vanilla-scoreboard badges, prepaid Numismatics chunk ticking, a
 
 Gradle 8.12 wrapper, Loom 1.9.2, Java **17 bytecode**. Build with a Gradle-supported JDK (verified with JDK 21); run this Minecraft pack with **Java 17**. The portable default resolves exact Modrinth `maven.modrinth:Jdbbtt0i:SJpLT0Bq`, Numismatics 1.0.15. `verifyNumismatics` checks the raw dependency SHA-512 `942e864837be870ea9584fd95a1bf43e05445f45286ca41f9b2774c89a9248067c3b3be9ba1a15641ea59ae870307f07670331b8473d743b0479f3d7ef294ed1`, including local overrides. No replacement economy/dependency is bundled.
 
-- Production: `build/libs/grxm-teams-1.0.0.jar`.
-- Sources: `build/libs/grxm-teams-1.0.0-sources.jar`.
-- **Isolated test only, never distribute:** `build/libs/grxm-teams-1.0.0-integration-test.jar`.
+- Production: `build/libs/grxm-teams-1.1.0.jar`.
+- Sources: `build/libs/grxm-teams-1.1.0-sources.jar`.
+- **Isolated test only, never distribute:** `build/libs/grxm-teams-1.1.0-integration-test.jar`.
 - Unit report: `build/reports/tests/test/index.html`.
 
 ## Commands
 
-`/smpteam` (alias `/teams`) leaves vanilla `/team` untouched.
+`/teams` (alias `/smpteam`) opens the in-game team menu and leaves vanilla `/team` untouched. No additional client mod is required: these are server-owned vanilla chest screens, with anvil name fields for text input. Command subcommands remain available as an operator/console fallback.
 
-- `create <name>`, `invite <online-name|canonical UUID>`, `accept <team UUID>`, `leave`
+The home screen leads to team creation and pending invitations, members and roles, colors/badges/name, treasury transfers, and a chunk map. The map shows nearby chunk coordinates, cycles dimensions, and links to a paginated list of every selected chunk. Green means an installed active ticket; yellow means selected but not active. Selection is a prepaid loading request, not land protection. Adding/removing a selection presents a confirmation with the current treasury and rent estimate. All supply, transfer and machine chunks need active tickets; a selected chunk is not automatically active when billing is disabled or funding is insufficient.
+
+Operators can open Administration from the home screen, or `/smpteam admin`. Its configuration browser edits a detached draft of the full configuration, including nested lists, maps and item-pool entries. Booleans toggle; scalar values use anvil text fields (50 characters per input). Long strings can be cleared/replaced and appended in segments; the display template also supports an explicit newline action. Navigate back to the containing section to validate and save, or discard the draft. Saving requires confirmation, checks permissions and the unchanged live configuration, and validates the whole candidate; merely editing a draft does not activate billing or payouts. Enabling billing can immediately charge eligible teams, so enter the intended rates before confirming. Existing paid terms and active weekly offers retain their frozen terms.
+
+Anvil input actions do not consume items or experience; the vanilla client may nevertheless display a cosmetic “Enchantment Cost: 1” prediction while typing. Validation failures preserve the previous configuration. A failure during immediate financial reconciliation is different: settings may already be applied and rent debited. The explicit “Configuration saved, but Teams is quarantined” error retains the applied settings and requires operator recovery; do not retry charges or assume the save was rolled back.
+
+For bazaar binding, look at the target block before opening Administration, choose Bind looked-at bazaar block, then select a slot and confirm. The target must still match and remain in reach when committed. Binding and unbinding do not place, replace or empty a block. Destructive team actions, ownership changes and financial operations have confirmation screens; service-side role checks remain authoritative on every mutation.
+
+- `create <name>`, `invite <online-name|canonical UUID>`, `accept <six-letter code|team UUID>`, `leave`
 - `role <player> <officer|member>`, `transfer <player>`, `disband confirm`
 - `style <color> <badge> <quoted-name>`, `rename <name>`, `badge <badge>`, `color <color>`
-- `treasury balance`, `treasury deposit <positive spurs>`, `treasury withdraw <positive spurs>`
+- `treasury balance`, `treasury deposit <positive spur count>`, `treasury withdraw <positive spur count>`
 - `chunks add`, `chunks remove` — current chunk
 - `chunks remove <dimension> <x> <z>`, `chunks list`, `chunks cost`, `chunks status`, `status`
 - `selector` — marked vanilla compass; right-click selects, sneak-right-click removes. No protection/land claims.
 - `admin reload`, `admin billingstatus`, `admin remove <team UUID> <dimension> <x> <z>`
-- **`admin bazaar bind <1|2|3>`** — look directly at the placed counter within `bazaar.bindReach` (default 6, maximum 8 blocks). Ray trace rejects air, walls and intervening pickable entities. No coordinates required.
-- `admin bazaar unbind <1|2|3>`, `admin bazaar status`
+- **`admin bazaar bind <slot>`** — look directly at the placed counter within `bazaar.bindReach` (default 6, maximum 8 blocks). Ray trace rejects air, walls and intervening pickable entities. No coordinates required.
+- `admin bazaar unbind <slot>`, `admin bazaar status`
 
-Admin commands require the configured operator level (default 2). Allowed counters: vanilla **barrel, lectern, smooth stone, stone, oak planks**. Binding changes no block state or contents. Each slot opens **only its corresponding global offer**, not the entire market. Three active offers are the default; configuration may select two, leaving counter 3 visibly inactive. The user places and binds the blocks; this mod does not place counters or modify the old creative vendor.
+Admin commands require the configured operator level (default 2). Any raycast-targetable non-air block can be a counter. Each slot opens **only its corresponding global offer**, not the entire market. Three offers remain the default; configure 1–256 offers with enough unique positive-weight pool entries. Counter slots are 1–256 and may be sparse; a slot beyond the current active offers is visibly inactive. The technical cap bounds selection work and display traffic, rather than limiting the design to three pedestals. The user places and binds the blocks; this mod does not place counters.
 
-Native Numismatics vendors are deliberately not bindable. **Retire the old unlimited creative mint separately before enabling the bazaar**, with a consistent backup and explicit operator confirmation. Intercepting its GUI alone does not retire automation/native minting. No production-world migration is performed by this code.
+Native Numismatics blocks can also be bound, but intercepting their click does **not** disable automation or native minting. **Retire the old unlimited creative mint separately before enabling the bazaar**, with a consistent backup and explicit operator confirmation. No production-world migration is performed by this code.
 
 All members share their team's allowance. Owner-only: ownership/roles/disband. Default officers can invite/style/manage chunks but cannot withdraw. Members can contribute and inspect their team's treasury. Disband refunds a funded treasury to the owner's native personal account, with overflow validation; the original treasury account and all sale proofs remain retained. New teams get fresh IDs and allowances. **Team hopping/recreation is intentionally permitted; there are no player caps or membership locks.**
+
+Invitations include a clickable accept message and a six-letter, case-insensitive team reference, for example `/smpteam accept ABCDEF`. Knowing the code is not permission to join: the accepting player still needs their own unexpired invitation. Codes are persisted with the team; existing teams receive one lazily without replacing their identity, treasury or pending invitations. Canonical team UUID acceptance remains compatible, and the menu can accept an existing pending invitation without typing either reference.
+
+### Physical spur deposits and withdrawals
+
+Player treasury transfers use physical **Numismatics spurs** (`numismatics:spur`), the smallest currency unit, rather than a personal bank account. The menu and command amount is a whole item count: `/smpteam treasury deposit 5` consumes five spur items from ordinary inventory and credits five units to the team treasury. `/smpteam treasury withdraw 5` debits five units and places five spur items into ordinary inventory. **1 spur item = 1 native treasury unit**; existing balances, rent calculations and bazaar unit prices do not change.
+
+Only main slots 0–35 participate. Offhand, armor, equipped backpacks and their contents are untouched. Withdrawal requires enough ordinary-inventory capacity; it rejects before admission rather than dropping currency on the ground. Existing withdrawal permissions still apply, and at least one economy feature must be enabled. No personal account is required or created by these player actions. Cogs and other higher denominations are not automatically exchanged.
+
+Disband's existing funded-treasury refund to the owner's native personal account is a separate operation, not changed by physical deposit/withdrawal. Without that account, withdraw the treasury as spur items before disbanding. Personal bazaar payouts, if explicitly configured, also retain their native-account destination.
 
 ## Operator configuration
 
@@ -84,6 +102,8 @@ Weighted sampling is **without replacement**, removing each chosen item before t
 
 Each registered counter opens a vanilla 9x3 chest screen showing its item, unit price, allowance left, week end, payout destination, and **Sell 1 / 16 / 64 / All** actions with total payouts. Display and player slots are read-only in this menu; shift/drag/swap/double-click paths cannot transfer icons. Every sale revalidates generation, membership, quota, ordinary main inventory slots 0–35, exact quantity and native balance headroom. No nested/container/offhand/armor inventories are searched. Payout defaults to the selling team's treasury; `payPersonal=true` still consumes that team's quota. A menu opened before destination-policy changes is rejected.
 
+Sale planning preserves the actual player inventory serializer's full NBT image, including Backpacked's extra slots; applying a sale mutates only the admitted ordinary main slots. Armor, offhand and backpack contents are neither sold nor reloaded. This corrects a mismatch where the old vanilla-only inventory round-trip lost extension-slot evidence and triggered a deliberate durability shutdown. Existing PREPARED transactions remain quarantined: installing corrected code is not an authorization to clear a journal or replay payment. Follow the recovery procedure below.
+
 ### Floating displays
 
 Packet-only native `ItemDisplay` + `TextDisplay`, **two entities per nearby viewer/counter**. They are not inserted into levels, persisted, ticked, dropped or picked up. Text shows **that viewer's team's** remaining allowance, unit spurs price and reset countdown. Nonmembers see a join-team message. Closed/inactive counters are labeled.
@@ -101,9 +121,11 @@ One ceiling-rounded total bill: `chunks * scalingFactor * teamMemberScaling * me
 
 Expire once from current wall time: renew if funded, otherwise suspend immediately with selections retained. Funding resumes without arrears. Expiry/failure ticket removals are unthrottled, admission bounded. Dedicated distance-2 tickets reach level 31/entity ticking and never change vanilla `/forceload`. At **START_SERVER_TICK**, eligible installed tickets reset the dimension's empty-time counter; without this, vanilla stops entities AND block entities after 300 player-free ticks. Keepalive stops when the last eligible ticket is gone. Neighbors also load; selected centers do not bound resident chunks. Player-distance spawning mechanics stay vanilla.
 
+Paid selected centers also receive vanilla-style random block/fluid sampling when vanilla has not already ticked that chunk during the current tick. This lets renewable dripstone lava, crops and other random-tick production continue without nearby players; machine/block-entity ticking alone cannot keep those supplies running. Sampling honors the dimension's live `randomTickSpeed`, including zero, and checks active paid entitlement, installed ticket, loaded/ticking chunk and allowed dimension. It runs only in selected center chunks, not the neighboring ticket halo. An observation-only mixin records actual vanilla `tickChunk` calls to prevent duplicate sampling; it does not enable player-free natural spawning or weather processing. Expiry, disabled billing, removal and service failure revoke the extra simulation. Billing still defaults disabled: stored selections alone do not provide free loading.
+
 ## Persistence and recovery — read before enabling
 
-Native balances and team/lease/market/quota/journal state share the actual Numismatics `numismatics_bank.dat` root, with a versioned UTF-8 byte-array/checksum attachment (8 MB aggregate bound). Schema 2 requires every market aggregate field. Legacy schema 1 upgrades once without inventing past rent rates: an old active receipt without a rate basis retains its end but cannot purchase additions until a newly snapshotted term. Missing/invalid native treasuries are never recreated.
+Native balances and team/lease/market/quota/journal state share the actual Numismatics `numismatics_bank.dat` root, with a versioned UTF-8 byte-array/checksum attachment (8 MB aggregate bound). Schema 3 requires complete market and physical-cash journal aggregates and every frozen cash-proof field. Schemas 1 and 2 migrate with an empty cash journal while preserving existing identities, accounts, leases, market terms and sale proofs; legacy schema 1 does not invent past rent rates, so an old active receipt without a rate basis retains its end but cannot purchase additions until a newly snapshotted term. Missing/invalid native treasuries are never recreated. After a schema upgrade, rollback requires the matching complete snapshot rather than an older JAR alone.
 
 Vanilla `SavedData.save(File)` is **not trusted**. A scoped mixin intercepts only actual `BankSavedData` instances. Bank writes use a same-directory temporary compressed NBT image, file force, complete NBT readback, **ATOMIC_MOVE + REPLACE_EXISTING**, complete target readback and directory force. No non-atomic fallback. Failures leave available temporary evidence and retain dirty state; success is not inferred from vanilla clearing dirty flags. Every custom mutation verifies the complete shared bank image synchronously before returning.
 
@@ -122,7 +144,13 @@ On uncertain durability, freeze **native BankAccount deposit/setBalance/deduct p
 
 **Recovery is deliberately conservative:** any PREPARED record quarantines the economy on restart, even with a matching player receipt. No automatic guessed refund/payout. COMMITTED is never replayed; its durable player receipt must match, or the economy is quarantined. Receipts survive later inventory changes and respawn. Frozen obligations survive team rename/transfer/disband and period rollover. Journal evidence is not erased when bazaar is disabled.
 
-The journal is bounded (default 2048, configurable 1–4096). Committed proofs are retained; **there is no unsafe automatic compaction**. A full journal visibly rejects new sales. The 8 MB aggregate cap also applies. Raising capacity within bounds may buy time; durable checkpoint/compaction requires a separately verified protocol, not deletion of proof.
+### Physical-cash exchange protocol
+
+Spur exchanges use a separate `cash.journal` in the same bank attachment, bounded at 4,096 retained transactions with no automatic compaction. Both directions validate permissions, balance arithmetic, ordinary inventory and available journal/aggregate capacity before admission. Deposits persist PREPARED before removing spur items. Withdrawals deduct/reserve the requested treasury amount in the same bank image as PREPARED, before delivering items. The exact full inventory image and a transaction-bound `grxmteamsCash` receipt are then saved/read back together in player NBT. Deposits credit the frozen treasury only after that verification; withdrawals do not debit it a second time. Both finish by persisting COMMITTED before reporting success.
+
+Interrupted or ambiguous cash exchanges freeze native finance, remove loading tickets and request shutdown. PREPARED cash is quarantined on restart, not automatically refunded or delivered. COMMITTED transfers are never replayed. Startup and admission check both directions of receipt/journal correspondence for cash and bazaar sales, including orphan player receipts. Keep cash and sale journals plus all player files together in backups; do not remove old proofs or clear receipt namespaces to bypass recovery. The 8 MB aggregate bound can reject admissions before the entry-count cap is reached.
+
+The separate bazaar sale journal is bounded (default 2048, configurable 1–4096). Committed proofs are retained; **there is no unsafe automatic compaction**. A full journal visibly rejects new sales. The 8 MB aggregate cap also applies. Raising capacity within bounds may buy time; durable checkpoint/compaction requires a separately verified protocol, not deletion of proof.
 
 **Operator recovery:** stop the server, preserve original bank/guard/player files, logs and `.grxm-bank-*.nbt` evidence, and make a working copy. Inspect frozen transactions against the matching player receipt images and native bank state. Restore a consistent whole-world backup or perform an explicitly audited offline reconciliation on the copy before replacing live state. Do not delete PREPARED records, edit balances from current item counts, delete the guard, or rerun payouts blindly. No production money-grant/timewarp/recovery command is exposed.
 
@@ -134,7 +162,8 @@ After SERVER_STARTED: `TeamsMod.service()`.
 
 - Detached `configuration()`, `snapshot()`, `teamOf(actor)`; `reload(candidate)` validates atomically.
 - `create`, `invite`, `accept`, `leave`, `role`, `transfer`, `disband`, `style`.
-- `deposit`, `withdraw`, `balance`, `addChunk`, `removeChunk`, `cost`, `status`.
+- `deposit(ServerPlayer, positiveSpurCount)` / `withdraw(ServerPlayer, positiveSpurCount)` exchange physical spur items without a personal account. `balance(UUID)` remains native spurs.
+- The legacy `deposit(UUID, spurs)` / `withdraw(UUID, spurs)` overloads remain trusted native personal-account integration APIs; player menus/commands do not use them. `addChunk`, `removeChunk`, `cost`, `status` are unchanged.
 - `activeTickets()`, `billingStatus()`, `failure()`.
 - `bazaar().snapshot()` includes complete journal; `displaySnapshot()` omits the journal while returning detached display/usage state.
 - `bazaar().remaining(actor, zeroBasedOfferIndex)`.
@@ -172,6 +201,8 @@ Phases:
 
 - `seed` → `verify` → `expire`, same fresh world: exact native transfers, role/ownership/cap/overflow denials, rate-reload proration snapshot, persisted bank+lease, no arrears/nonpayment suspension. In the **player-free End with zero vanilla forced chunks**, an actual Create creative motor drives an assembled mechanical-bearing stone contraption. Compare real bearing angle at ticks **400 and 437**, observe an invulnerable no-gravity armor stand beyond 350 ticks, and require a furnace ingot. This deliberately exceeds the dimension's 300-empty-tick gate.
 - `bazaar` → `bazaar-verify`, a separate fresh world: actual ordinary inventory removals/native payouts/player receipts, GUI Sell 1, icon/movement denial, shared member exhaustion, target-balance overflow, fixed prices across reload, stale generation denial, monotonic rollback behavior, complete bank/journal/quota restart. POV binding and per-viewer display packets are exercised internally; client visual inspection remains separate.
+- The bazaar fixture equips real Backpacked inventories with nested sale items, plus armor and offhand items. It asserts those non-sale slots are unchanged in memory and in the durable player image, and that backpack-equipped sales do not quarantine the economy.
+- `random`, in a separate fresh world: actual paid player-free selected centers run beyond 300 empty ticks. Verify live/zero `randomTickSpeed`, exact sample count, recurring dripstone lava refills after emptying cauldrons, mature wheat, an independently ticketed but unselected control, duplicate suppression after an actual vanilla `tickChunk`, and disable/remove/expiry/failure revocation. Production is accelerated for bounded testing; normal-speed long-duration throughput and populated-server performance are not measured by this fixture. Run with `python3 scripts/integration_suite.py MARKED_TEMPLATE "$TMPDIR/grxm-random-NEW" random`.
 - `cut-prepared`, `cut-player`, `cut-committed`, **each its own fresh world**: at the real verified boundary, call `Runtime.halt(23)` so no shutdown save can make the test falsely pass. Require the phase-specific `-CUT.txt` and exit 23. Then `recover-cut` on the same world checks PREPARED quarantine or COMMITTED no replay, exact bank credit and matching player proof.
 - `cut-failed-commit`: after verified player removal, replace the bank target with a directory to force a real atomic replacement failure. Require uncertain RAM credit to remain unspendable through native debit/credit/setBalance and shutdown to be requested. The harness restores the preserved PREPARED bank image only after process exit, then checks restart quarantine.
 - `corrupt`: on a deliberately damaged **copy**, requires unavailable service/no tickets and preserves invalid attachment through native serialization. Whole-bank corruption/missing-file preflight can stop before the tick driver runs: check its refusal log and unchanged bad file, not a driver PASS.
@@ -187,3 +218,25 @@ python3 scripts/verify_bank_guards.py \
 This intentionally truncates/removes only cloned bank files, then separately uses the doubly guarded `damage-native` phase to write a malformed native account under an intact team envelope and halt. It requires the relevant preflight/fallback refusal log and verifies the bad bytes remain unchanged or the missing file remains absent.
 
 Each normal phase requires its exact `grxmteams-integration-<phase>-PASS.txt` and no `grxmteams-integration-FAIL.txt`; exit 0 alone is not acceptance. The harness records `results.json` plus all full server logs. Actual client shop/hover text, floating item/text appearance, signed chat/badge/resource-pack display, and deliberate production old-mint retirement remain separate release gates. Unit tests do not claim to exercise server mixins.
+
+The separate menu regression entrypoint uses actual server container-click and anvil-rename packet handlers, without a network authentication bypass:
+
+```sh
+GRXM_MENU_TEST_PORT=25591 python3 scripts/menu_integration_suite.py \
+  /absolute/path/to/marked-isolated-template \
+  "$TMPDIR/grxm-menu-acceptance-NEW"
+```
+
+It exercises creation, six-letter acceptance and invitation authorization, pending-invitation selection, stale ownership/treasury confirmations, fake-item isolation, nested configuration persistence and rollback, permission revocation, cross-dimension chunk pagination/removal and high-slot POV counter binding. Finally it deliberately prevents a bank replacement during billing activation: the service must quarantine, return an explicit saved-but-quarantined recovery error, and retain the applied candidate consistently in disk/live/AutoConfig state without undoing or retrying the debit. The preserved bank and `quarantine-proof.txt` remain in the disposable fixture; this is not a recovery operation. The scratch-only test JAR changes the integration entrypoint, not the production JAR. Its `results.json` must contain the phase proof and no failure. Packet acceptance does not by itself establish client rendering or clickability.
+
+Physical-spur exchange has a separate doubly guarded entrypoint. Run medium phase groups to retain results across runner timeouts:
+
+```sh
+python3 scripts/cash_integration_suite.py MARKED_TEMPLATE "$TMPDIR/grxm-cash-happy-NEW" happy
+export CASH_SEED="$TMPDIR/grxm-cash-happy-NEW/seed"
+python3 scripts/cash_integration_suite.py MARKED_TEMPLATE "$TMPDIR/grxm-cash-deposit-NEW" deposit
+python3 scripts/cash_integration_suite.py MARKED_TEMPLATE "$TMPDIR/grxm-cash-withdraw-NEW" withdraw
+python3 scripts/cash_integration_suite.py MARKED_TEMPLATE "$TMPDIR/grxm-cash-fault-NEW" fault
+```
+
+The happy/restart and cash→bazaar→cash checks use no personal accounts, test member/officer permissions, exact spur counts, stack merging/full-capacity rejection, invalid denominations, retained backpack/armor/offhand and respawn-copy receipts. Each direction separately halts at PREPARED, PLAYER_SAVED and COMMITTED, restarts and verifies exact inventory/balance plus quarantine or no replay. Fault cases force a real bank replacement failure and require native mutators frozen with shutdown requested. `GRXM_CASH_TEST_PORT` selects an isolated port (25961–64000; default 25961); do not run groups concurrently on the same port. Each output retains `results.json`, logs and phase proofs. Never install the integration JAR or its modified test entrypoint in production.

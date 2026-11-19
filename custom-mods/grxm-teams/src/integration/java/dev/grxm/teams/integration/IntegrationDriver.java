@@ -38,6 +38,7 @@ public final class IntegrationDriver implements ModInitializer {
     @Override public void onInitialize() {
         if(!Boolean.getBoolean("grxmteams.integration") || !Files.isRegularFile(Path.of("grxmteams-integration-ALLOW")))throw new IllegalStateException("ISOLATED TEST MOD: requires -Dgrxmteams.integration=true AND grxmteams-integration-ALLOW file; REMOVE THIS JAR FROM PRODUCTION");
         phase=System.getProperty("grxmteams.integration.phase","seed");
+        if(phase.equals("random")){RandomTicksIntegration.install();return;}
         TeamsMod.installTimeSource(()->Math.addExact(System.currentTimeMillis(),timeOffset));
         if(!Set.of("seed","verify","expire","corrupt","bazaar","bazaar-verify","cut-prepared","cut-player","cut-committed","cut-failed-commit","damage-native","recover-cut").contains(phase))throw new IllegalArgumentException("Unknown integration phase");
         ServerTickEvents.END_SERVER_TICK.register(server->{
@@ -189,6 +190,11 @@ public final class IntegrationDriver implements ModInitializer {
         var p=new net.minecraft.server.level.ServerPlayer(server,server.overworld(),new com.mojang.authlib.GameProfile(uuid,name));
         var connection=new CaptureConnection();captures.put(uuid,connection);p.connection=new net.minecraft.server.network.ServerGamePacketListenerImpl(server,connection,p);return p;
     }
+    private static net.minecraft.nbt.ListTag nonSaleInventory(net.minecraft.nbt.ListTag inventory) {
+        var retained=new net.minecraft.nbt.ListTag();
+        for(int i=0;i<inventory.size();i++){var entry=inventory.getCompound(i);if((entry.getByte("Slot")&255)>=36)retained.add(entry.copy());}
+        return retained;
+    }
     private void bazaar(MinecraftServer server,TeamService s) throws Exception {
         check(s.failure()==null,"Bazaar service ready: "+s.failure());
         if(phase.equals("bazaar-verify")) {
@@ -203,6 +209,22 @@ public final class IntegrationDriver implements ModInitializer {
         var p=fixture(server,OWNER,"OwnerFixture");var member=fixture(server,MEMBER,"MemberFixture");
         p.getInventory().setItem(0,new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation(item)),20));
         member.getInventory().setItem(0,new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation(item)),20));
+        // Production incident: Backpacked replaces Inventory with ExtendedPlayerInventory.
+        // A vanilla detached Inventory drops its serialized slot 200, while live save retains it.
+        var backpackId=new net.minecraft.resources.ResourceLocation("backpacked:backpack");
+        check(net.minecraft.core.registries.BuiltInRegistries.ITEM.containsKey(backpackId),"Sale regression requires the actual production Backpacked mod");
+        for(var seller:List.of(p,member)) {
+            var inventory=seller.getInventory().save(new net.minecraft.nbt.ListTag());
+            var backpack=new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(backpackId));
+            var nested=new net.minecraft.nbt.ListTag();var contents=new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation(item)),64).save(new net.minecraft.nbt.CompoundTag());contents.putByte("Slot",(byte)0);nested.add(contents);backpack.getOrCreateTag().put("Items",nested);
+            var entry=backpack.save(new net.minecraft.nbt.CompoundTag());entry.putByte("Slot",(byte)200);inventory.add(entry);
+            seller.getInventory().load(inventory);
+            check(seller.getInventory().save(new net.minecraft.nbt.ListTag()).equals(inventory),"Actual extended inventory equips nested backpack without losing slot 200");
+            seller.getInventory().setItem(36,new ItemStack(Items.DIAMOND_BOOTS));
+            seller.getInventory().setItem(40,new ItemStack(Items.SHIELD));
+        }
+        var ownerOtherSlots=nonSaleInventory(p.getInventory().save(new net.minecraft.nbt.ListTag()));
+        var memberOtherSlots=nonSaleInventory(member.getInventory().save(new net.minecraft.nbt.ListTag()));
         ((dev.grxm.teams.mixin.PlayerListAccessor)server.getPlayerList()).grxmteams$playerIo().save(p);
         if(phase.equals("cut-failed-commit")) {
             s.bazaar().installObserver(cut->{if(cut==BazaarService.Cut.PLAYER_SAVED)try {
@@ -230,6 +252,13 @@ public final class IntegrationDriver implements ModInitializer {
         menu.clicked(10,0,net.minecraft.world.inventory.ClickType.PICKUP,p);check(s.balance(OWNER)==3,"Real GUI Sell 1 mints native bank credit");
         p.closeContainer();s.bazaar().sell(p,market.generation,team,0,9);s.bazaar().sell(member,market.generation,team,0,10);
         check(s.balance(OWNER)==60,"Real ordinary inventory sales mint native treasury credit");check(p.getInventory().getItem(0).getCount()==10&&member.getInventory().getItem(0).getCount()==10,"Exact items consumed");
+        for(var seller:List.of(p,member)) {
+            var expected=seller==p?ownerOtherSlots:memberOtherSlots;
+            check(nonSaleInventory(seller.getInventory().save(new net.minecraft.nbt.ListTag())).equals(expected),"Sale preserves armor, offhand and nested backpack in RAM");
+            var root=net.minecraft.nbt.NbtIo.readCompressed(server.getWorldPath(net.minecraft.world.level.storage.LevelResource.PLAYER_DATA_DIR).resolve(seller.getUUID()+".dat").toFile());
+            check(nonSaleInventory(root.getList("Inventory",10)).equals(expected),"Durable player image preserves all non-sale slots including backpack contents");
+        }
+        check(s.failure()==null&&!BankPersistence.frozen(),"Backpack-equipped GUI and member sales do not quarantine the economy");
         Numismatics.BANK.getOrCreateAccount(OWNER,BankAccount.Type.PLAYER).setBalance(0);s.withdraw(OWNER,3);check(s.balance(OWNER)==57,"Bazaar-only activation permits authorized withdrawal without enabling rent");s.deposit(OWNER,3);check(s.balance(OWNER)==60,"Bazaar-only contribution restores treasury");
         denied(()->s.bazaar().sell(p,market.generation,team,0,1),"Shared member quota exhausted");check(p.getInventory().getItem(0).getCount()==10&&s.balance(OWNER)==60,"Rejected sale leaves items and money unchanged");
         s.create(OUTSIDER,"Overflow Team");var outsider=fixture(server,OUTSIDER,"OtherFixture");outsider.getInventory().setItem(0,new ItemStack(net.minecraft.core.registries.BuiltInRegistries.ITEM.get(new net.minecraft.resources.ResourceLocation(item)),20));

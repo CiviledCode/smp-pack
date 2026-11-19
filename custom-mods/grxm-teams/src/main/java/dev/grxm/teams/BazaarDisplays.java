@@ -44,7 +44,7 @@ public final class BazaarDisplays {
                     if(slot<=m.offers.size())item.getSlot(0).set(new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(m.offers.get(slot-1).itemId()))));
                     else item.getSlot(0).set(new ItemStack(Items.BARRIER));
                     item.setPos(c.x()+.5,c.y()+cfg.itemHeight,c.z()+.5);
-                    Display.TextDisplay text=new Display.TextDisplay(EntityType.TEXT_DISPLAY,player.level());CompoundTag tag=new CompoundTag();tag.putString("billboard","center");tag.putInt("line_width",240);tag.putBoolean("shadow",true);text.load(tag);text.setPos(c.x()+.5,c.y()+cfg.textHeight,c.z()+.5);
+                    Display.TextDisplay text=new Display.TextDisplay(EntityType.TEXT_DISPLAY,player.level());CompoundTag tag=new CompoundTag();tag.putString("billboard","center");tag.putString("alignment","center");tag.putInt("line_width",240);tag.putBoolean("shadow",true);text.load(tag);text.setPos(c.x()+.5,c.y()+cfg.textHeight,c.z()+.5);
                     view=new View(c,m.generation,fingerprint,item,text);current.put(slot,view);
                     player.connection.send(item.getAddEntityPacket());data(player,item);player.connection.send(text.getAddEntityPacket());
                 }

@@ -12,7 +12,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.*;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.phys.*;
 import java.nio.file.*;
@@ -50,7 +49,7 @@ public final class BazaarService {
     }
     public void rotate() {
         teams.ready(); var c=config(); if(!c.enabled)return;
-        long now=teams.nowMillis();BazaarState current=teams.liveMarket();if(current.generation>0&&now<current.end)return;BazaarState m=snapshot();
+        long now=teams.nowMillis();BazaarState current=teams.liveMarket();if(!current.rotationDue(now))return;BazaarState m=snapshot();
         validatePool(c); long period=Math.multiplyExact(c.periodSeconds,1000),epoch=Math.multiplyExact(c.epochSeconds,1000);
         long start=Math.addExact(epoch,Math.multiplyExact(Math.floorDiv(now-epoch,period),period));
         if(start<0)throw new IllegalArgumentException("Bazaar clock precedes supported epoch");
@@ -67,7 +66,7 @@ public final class BazaarService {
         for(int slot=0;slot<36;slot++){ItemStack stack=player.getInventory().getItem(slot);if(stack.is(item))n=Math.addExact(n,stack.getCount());}return n;
     }
     public UUID sell(ServerPlayer player,long generation,UUID teamId,int offer,int count) {
-        teams.ready();rotate();var cfg=config();if(!cfg.enabled)throw new IllegalArgumentException("Bazaar is disabled until configured");
+        teams.ready();teams.cash().admit(player);rotate();var cfg=config();if(!cfg.enabled)throw new IllegalArgumentException("Bazaar is disabled until configured");
         BazaarState m=snapshot();var t=teams.teamOf(player.getUUID());
         if(!t.id.equals(teamId)||m.generation!=generation||offer<0||offer>=m.offers.size())throw new IllegalArgumentException("Stale shop; reopen the counter");
         if(!player.isAlive()||player.isSpectator())throw new IllegalArgumentException("Player cannot sell now");
@@ -81,13 +80,18 @@ public final class BazaarService {
         ListTag before=player.getInventory().save(new ListTag()); Inventory proposed=new Inventory(player);proposed.load(before.copy());int left=count;Item item=BuiltInRegistries.ITEM.get(new ResourceLocation(o.itemId()));
         for(int slot=0;slot<36&&left>0;slot++){ItemStack stack=proposed.getItem(slot);if(stack.is(item)){int n=Math.min(left,stack.getCount());stack.shrink(n);left-=n;}}
         if(left!=0)throw new IllegalStateException("Inventory changed during validation");
-        ListTag after=proposed.save(new ListTag());Sale sale=new Sale();sale.id=UUID.randomUUID();sale.player=player.getUUID();sale.team=t.id;sale.account=destination;sale.personal=cfg.payPersonal;sale.generation=m.generation;sale.offer=offer;sale.count=count;sale.unitPrice=o.unitPrice();sale.itemId=o.itemId();sale.payout=payout;sale.balanceBefore=a.getBalance();sale.beforeInventory=before.toString();sale.afterInventory=after.toString();sale.receipt=StateCodec.digest(StateCodec.GSON.toJson(sale));
+        // Preserve the actual serializer's complete image, including Backpacked's extra slots.
+        ListTag after=before.copy();
+        for(int i=after.size()-1;i>=0;i--){CompoundTag entry=after.getCompound(i);int slot=entry.getByte("Slot")&255;if(slot<36){ItemStack stack=proposed.getItem(slot);if(stack.isEmpty())after.remove(i);else entry.putByte("Count",(byte)stack.getCount());}}
+        Sale sale=new Sale();sale.id=UUID.randomUUID();sale.player=player.getUUID();sale.team=t.id;sale.account=destination;sale.personal=cfg.payPersonal;sale.generation=m.generation;sale.offer=offer;sale.count=count;sale.unitPrice=o.unitPrice();sale.itemId=o.itemId();sale.payout=payout;sale.balanceBefore=a.getBalance();sale.beforeInventory=before.toString();sale.afterInventory=after.toString();sale.receipt=StateCodec.digest(StateCodec.GSON.toJson(sale));
         m.journal.put(sale.id,sale);m.used.put(key,Math.addExact(used,count));
         var prospective=teams.snapshot();prospective.bazaar=m;StateCodec.encode(prospective); // Reject aggregate-size/schema failure before admission.
         // Everything below is a durability boundary: never compensate using guessed inventory.
         try {
             teams.persistBazaar(m);observer.accept(Cut.PREPARED);
-            player.getInventory().load(after);((PlayerReceipts)player).grxmteams$receipts().putString(sale.id.toString(),sale.receipt);
+            // Never reload armor, offhand or extension inventories to consume ordinary items.
+            for(int slot=0;slot<36;slot++)if(!ItemStack.matches(player.getInventory().getItem(slot),proposed.getItem(slot)))player.getInventory().setItem(slot,proposed.getItem(slot).copy());
+            ((PlayerReceipts)player).grxmteams$receipts().putString(sale.id.toString(),sale.receipt);
             ((PlayerListAccessor)server.getPlayerList()).grxmteams$playerIo().save(player);
             Path path=playerFile(player.getUUID());
             try(FileChannel f=FileChannel.open(path,StandardOpenOption.WRITE)){f.force(true);}
@@ -104,14 +108,15 @@ public final class BazaarService {
         return snapshot().counters.values().stream().filter(c->c.dimension().equals(dim)&&c.x()==pos.getX()&&c.y()==pos.getY()&&c.z()==pos.getZ()).findFirst().orElse(null);
     }
     public void bindLook(ServerPlayer player,int slot) {
-        teams.ready();if(slot<1||slot>3)throw new IllegalArgumentException("Slot must be 1, 2 or 3");
-        HitResult hit=player.pick(config().bindReach,1,false);if(!(hit instanceof BlockHitResult b)||hit.getType()!=HitResult.Type.BLOCK)throw new IllegalArgumentException("Look at a solid counter within reach");
+        teams.ready();if(slot<1||slot>TeamsConfig.Bazaar.MAX_COUNTERS)throw new IllegalArgumentException("Slot must be 1.."+TeamsConfig.Bazaar.MAX_COUNTERS);
+        HitResult hit=player.pick(config().bindReach,1,true);if(!(hit instanceof BlockHitResult b)||hit.getType()!=HitResult.Type.BLOCK)throw new IllegalArgumentException("Look at a non-air block within reach");
         var eye=player.getEyePosition();var end=eye.add(player.getViewVector(1).scale(config().bindReach));
         var obstructing=net.minecraft.world.entity.projectile.ProjectileUtil.getEntityHitResult(player,eye,end,player.getBoundingBox().expandTowards(end.subtract(eye)).inflate(1),entity->!entity.isSpectator()&&entity.isPickable(),eye.distanceToSqr(b.getLocation()));
         if(obstructing!=null)throw new IllegalArgumentException("An entity obstructs the looked-at counter");
         BlockPos pos=b.getBlockPos();var state=player.serverLevel().getBlockState(pos);
-        // Deliberately narrow, non-financial vanilla blocks. Does not replace blocks or destroy inventories.
-        if(!(state.is(Blocks.BARREL)||state.is(Blocks.LECTERN)||state.is(Blocks.SMOOTH_STONE)||state.is(Blocks.STONE)||state.is(Blocks.OAK_PLANKS)))throw new IllegalArgumentException("Counter must be a vanilla barrel, lectern, smooth stone, stone or oak planks; native vendors are not supported");
+        // Binding only records identity; never replace a native vendor or mutate its inventory/account.
+        // The bound-use callback consumes both hands even on failure, before native block use.
+        if(state.isAir())throw new IllegalArgumentException("Counter must be a non-air block");
         BazaarState m=snapshot();Counter counter=new Counter(player.level().dimension().location().toString(),pos.getX(),pos.getY(),pos.getZ(),BuiltInRegistries.BLOCK.getKey(state.getBlock()).toString());
         m.counters.entrySet().removeIf(e->e.getValue().equals(counter));m.counters.put(slot,counter);teams.persistBazaar(m);
     }

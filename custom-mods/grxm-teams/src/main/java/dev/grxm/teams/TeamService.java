@@ -40,6 +40,7 @@ public final class TeamService {
             state=attachment.grxmteams$getJson()==null?new TeamState():StateCodec.decode(attachment.grxmteams$getJson());
             validateAccounts(state); validateConfiguredState(state,config);
             publish(state,StateCodec.encode(state)); // Verify the loaded bank and repair a missing sticky guard before admission.
+            cash=new CashService(this,server); cash.recover();
             bazaar=new BazaarService(this,server); bazaar.recover(); displays=new BazaarDisplays(this,server);
             reconcile(nowMillis());
             refreshPresentation();
@@ -71,6 +72,13 @@ public final class TeamService {
         attachment.grxmteams$setJson(encoded); state=next; bankData.setDirty();
         try { BankPersistence.commit(bankData); } catch(RuntimeException e) { fail(e); server.halt(false); throw e; }
     }
+    void cashFinancial(){financial();}
+    void persistCash(CashState cash) { TeamState next=copy(); next.cash=cash; publish(next); }
+    public CashService cash(){ready();return cash;}
+    private CashService cash;
+    /** Physical whole SPUR items; no personal account lookup or creation. */
+    public void deposit(ServerPlayer player,int spurCount){cash().exchange(player,spurCount,CashState.Direction.DEPOSIT);reconcile(nowMillis());}
+    public void withdraw(ServerPlayer player,int spurCount){cash().exchange(player,spurCount,CashState.Direction.WITHDRAW);}
     BazaarState liveMarket(){ready();return state.bazaar;}
     void persistBazaar(BazaarState market) { TeamState next=copy(); next.bazaar=market; publish(next); }
     void quarantine(RuntimeException e) { fail(e); server.halt(false); }
@@ -90,7 +98,7 @@ public final class TeamService {
         if(next.teams.size()>=config.limits.maxTeams)throw new IllegalArgumentException("Team limit reached");
         Team t=new Team(); t.id=UUID.randomUUID(); do { t.account=UUID.randomUUID(); } while(Numismatics.BANK.getAccount(t.account)!=null || t.account.equals(t.id));
         Presentation.checkKeyAvailable(server,t.id);
-        t.name=name; t.color=config.presentation.defaultColor; t.badge=config.presentation.defaultBadge; t.members.put(actor,Role.OWNER); next.teams.put(t.id,t);
+        t.name=name; t.color=config.presentation.defaultColor; t.badge=config.presentation.defaultBadge; t.inviteCode=newInviteCode(next); t.members.put(actor,Role.OWNER); next.teams.put(t.id,t);
         String encoded=StateCodec.encode(next);
         BankAccount bank=Numismatics.BANK.getOrCreateAccount(t.account,BankAccount.Type.BLAZE_BANKER);
         if(bank.getBalance()!=0 || bank.type!=BankAccount.Type.BLAZE_BANKER)throw new IllegalStateException("Native treasury did not start empty");
@@ -100,8 +108,22 @@ public final class TeamService {
         ready(); TeamState next=copy(); Team t=next.member(actor); TeamState.authorize(t,actor,Action.INVITE,config); noOtherMembership(next,target);
         long now=nowMillis(); t.invites.entrySet().removeIf(e->e.getValue()<=now);
         if(t.members.size()>=config.limits.maxMembers || t.invites.size()>=config.limits.maxInvitesPerTeam && !t.invites.containsKey(target))throw new IllegalArgumentException("Member/invitation cap reached");
+        if(t.inviteCode==null)t.inviteCode=newInviteCode(next);
         t.invites.put(target,Prices.nextEnd(now,config.limits.inviteSeconds)); publish(next);
-        var p=server.getPlayerList().getPlayer(target); if(p!=null)p.sendSystemMessage(Component.literal(message("invite").replace("{team}",t.name).replace("{id}",t.id.toString())));
+        var p=server.getPlayerList().getPlayer(target); if(p!=null)p.sendSystemMessage(Component.literal(message("invite").replace("{team}",t.name).replace("{id}",t.inviteCode)).withStyle(style->style.withClickEvent(new net.minecraft.network.chat.ClickEvent(net.minecraft.network.chat.ClickEvent.Action.RUN_COMMAND,"/smpteam accept "+t.inviteCode))));
+    }
+    private static String newInviteCode(TeamState next) { return InvitationCodes.allocate(next.teams.values().stream().map(t->t.inviteCode).filter(Objects::nonNull).toList()); }
+    public String invitationCode(UUID actor,UUID team) {
+        ready(); Team t=state.byId(team);
+        Long expiry=t.invites.get(actor);
+        if(!t.members.containsKey(actor)&&(expiry==null||expiry<=nowMillis()))throw new IllegalArgumentException("No valid invitation");
+        if(t.inviteCode!=null)return t.inviteCode;
+        TeamState next=copy(); Team updated=next.byId(team); updated.inviteCode=newInviteCode(next); publish(next); return updated.inviteCode;
+    }
+    public void acceptCode(UUID actor,String code) {
+        ready(); String normalized=InvitationCodes.normalize(code);
+        UUID id=state.teams.values().stream().filter(t->normalized.equals(t.inviteCode)).map(t->t.id).findFirst().orElseThrow(()->new IllegalArgumentException("No valid invitation for that code"));
+        accept(actor,id);
     }
     public void accept(UUID actor,UUID team) {
         ready(); TeamState next=copy(); noOtherMembership(next,actor); Team t=next.byId(team);
@@ -206,7 +228,23 @@ public final class TeamService {
         reconcileTickets(nowMillis());
         for(Chunk c:tickets) { ServerLevel world=level(c); if(world!=null)world.resetEmptyTime(); }
     }
-    public void tick() { thread(); if(displays!=null)displays.tick(); if(failure!=null)return; long now=nowMillis(); if(bazaar!=null){bazaar.rotate();if(ticks%20==0)bazaar.retireChangedCounters();} if(++ticks%config.billing.checkEveryTicks==0)reconcile(now); else reconcileTickets(now); }
+    public void tick() { thread(); if(displays!=null)displays.tick(); if(failure!=null)return; long now=nowMillis(); if(bazaar!=null){bazaar.rotate();if(ticks%20==0)bazaar.retireChangedCounters();} if(++ticks%config.billing.checkEveryTicks==0)reconcile(now); else reconcileTickets(now); tickSelectedRandomBlocks(); }
+    /** END tick: vanilla has finished, so actual tickChunk calls can suppress duplicate sampling. */
+    private void tickSelectedRandomBlocks() {
+        if(failure!=null || !config.billing.enabled)return;
+        try {
+            ready();
+            for(Chunk c:new ArrayList<>(tickets)) {
+                long now=nowMillis();
+                if(!state.teams.values().stream().anyMatch(t->!t.suspended && Prices.active(now,t.leaseStart,t.leaseEnd) && t.chunks.contains(c)))continue;
+                if(!config.limits.allowedDimensions.contains(c.dimension()))continue;
+                ServerLevel world=level(c); if(world==null)continue;
+                // Never synchronously load a pending ticket or simulate its neighboring ticket halo.
+                var chunk=world.getChunkSource().getChunkNow(c.x(),c.z());
+                if(chunk!=null)SelectedChunkRandomTicks.tick(world,chunk);
+            }
+        } catch(RuntimeException e) { fail(e); }
+    }
     private void removeTickets() { for(Chunk c:new ArrayList<>(tickets)) { ServerLevel world=level(c); if(world!=null)world.getChunkSource().removeRegionTicket(TICKET,new ChunkPos(c.x(),c.z()),2,new ChunkPos(c.x(),c.z())); } tickets.clear(); }
     public void stop() { thread(); if(displays!=null)displays.stop(); removeTickets(); }
     public void refreshPresentation() { ready(); Presentation.refresh(server,state,config); }
