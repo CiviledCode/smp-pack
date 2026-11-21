@@ -1,6 +1,6 @@
 # GRXM Teams — Fabric server-only, Minecraft 1.20.1
 
-Teams, graphical vanilla-scoreboard badges, prepaid Numismatics chunk ticking, and a shared weekly item-buyback bazaar. No additional client Java mod is required. The badge resource pack is independent of the vanilla shop/display protocols.
+Teams, graphical vanilla-scoreboard badges, prepaid Numismatics chunk ticking, and a shared weekly item-buyback bazaar. The menus use vanilla client protocols. The [client badge resource mod](../grxm-team-badges/README.md) bundles artwork as always-enabled Fabric resources; it contains no Java code and is independent of the vanilla shop/display protocols. The GRXM Teams server JAR remains server-only and unchanged.
 
 ## Build
 
@@ -66,7 +66,7 @@ Relevant sections:
 - `limits`: teams, members, chunks/team, selected centers globally (64), invitations/expiry, dimensions, names, admissions/tick, selector.
 - `permissions`: individual officer capabilities, admin level.
 - `presentation`: badge glyph map/font/default, colors, prefix delimiters. Unrelated vanilla scoreboard teams are not overwritten. Signed player chat is not replaced with system messages.
-- `resourcePack`: enabled/required/URL/SHA-1/prompt. Default asset `assets/grxm-team-badges-1.0.0.zip`, SHA-1 `bc02f256708eb0d6928705c5f661418b3c98fb74`, repository master URL. Publish the asset before activation.
+- `resourcePack`: enabled/required/URL/SHA-1/prompt. Legacy fallback asset `assets/grxm-team-badges-1.0.0.zip`, SHA-1 `bc02f256708eb0d6928705c5f661418b3c98fb74`. After publishing and distributing the client badge resource mod, separately set **`resourcePack.enabled=false`** in the existing operator config and run `/smpteam admin reload` or cleanly restart. `required=false` alone still sends a pack request and can trigger a join-time reload. Server-mod request defaults remain unchanged; old clients need the legacy ZIP until rollout. See the [badge rollout manual](../grxm-team-badges/README.md#rollout-status-and-server-requirement). Do not overwrite other operator settings.
 - `messages`: success/errorPrefix/suspended/renewed/invite (`{team}`, `{id}`). Specific validation errors remain diagnostic.
 - `bazaar`: settings below.
 

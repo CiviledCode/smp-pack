@@ -1,12 +1,12 @@
 name = "GRXM SMP"
 author = "Civiled"
-version = "1.6.0"
+version = "1.6.1"
 pack-format = "packwiz:1.1.0"
 
 [index]
 file = "index.toml"
 hash-format = "sha256"
-hash = "19c967860ea429736db1db859fab93b48579a4c33ad7ce5bf7fa1811507e2cc3"
+hash = "eb7c727dd90f62192c045c3dacbf5983b6bccd5dc58c6d6d238b2934823d5832"
 
 [versions]
 fabric = "0.18.3"

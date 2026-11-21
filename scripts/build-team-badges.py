@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Build the small Minecraft 1.20.1 graphical team-badge resource pack.
 
-Editable PNGs and font mapping live in assets/team-badges. No client mod is needed.
+Editable PNGs and font mapping live in assets/team-badges. The legacy ZIP remains
+available; custom-mods/grxm-team-badges/build.py bundles the same bytes for clients.
 """
 import hashlib
 import json

@@ -1,0 +1,34 @@
+// Test harness only: production is the code-free JAR built by build.py.
+plugins { id 'fabric-loom' version '1.9.2' }
+repositories { mavenCentral() }
+dependencies {
+    minecraft 'com.mojang:minecraft:1.20.1'
+    mappings loom.officialMojangMappings()
+    modImplementation 'net.fabricmc:fabric-loader:0.18.3'
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.92.12+1.20.1'
+    modRuntimeOnly files('../../assets/mods/grxm-team-badges-1.0.0.jar')
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+java { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
+tasks.withType(JavaCompile).configureEach { options.release = 17 }
+tasks.register('bundleBadges', Exec) { commandLine 'python3', 'build.py' }
+loom {
+    runs {
+        client {
+            // Loom 1.9.2 joins this string to projectDir, even for absolute paths.
+            runDir project.relativePath(file(providers.gradleProperty('badgeRunDir').getOrElse('run')))
+            vmArg '-Xmx2G'
+        }
+    }
+}
+tasks.named('runClient', JavaExec) {
+    dependsOn bundleBadges
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+}
+test {
+    dependsOn bundleBadges
+    useJUnitPlatform()
+    javaLauncher = javaToolchains.launcherFor { languageVersion = JavaLanguageVersion.of(17) }
+    systemProperty 'badge.root', rootDir.parentFile.parentFile.absolutePath
+    testLogging { events 'passed', 'failed'; showStandardStreams = true }
+}

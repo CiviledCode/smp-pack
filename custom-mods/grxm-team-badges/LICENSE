@@ -1,0 +1,11 @@
+GRXM badge assets and packaging
+
+No additional redistribution or modification license is granted by this packaging.
+The existing repository badge assets are included unchanged; their ownership and
+permissions are unchanged. LicenseRef-GRXM-Assets identifies this notice, not an
+open-source license grant.
+
+Fabric Loader and Fabric API are external dependencies, not copied into this JAR.
+Fabric's resource loader is licensed under Apache-2.0. Minecraft is proprietary
+and is not included. The build and verification tooling uses the existing Gradle
+wrapper and exact Fabric/Minecraft dependencies from this repository's toolchain.
