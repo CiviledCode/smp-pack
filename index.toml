@@ -529,6 +529,16 @@ hash = "7d60672df0dff49d05b7979ecfb7ba7cb4d43dd7abd048868cb5667a3b04090e"
 metafile = true
 
 [[files]]
+file = "mods/grxm-end-city-density.pw.toml"
+hash = "67d8342b915e9254b57cd7a29bc11c4c7c663b1891605fc2d1484625612d6c83"
+metafile = true
+
+[[files]]
+file = "mods/grxm-end-radar.pw.toml"
+hash = "e034883a9ee057a339059ce074b98a01863b4fa95013b7eaa7c91895980bc1a3"
+metafile = true
+
+[[files]]
 file = "mods/grxm-team-badges.pw.toml"
 hash = "16fff74b39aa031ead1a4ca5f4b6a837e7086e9f789395127cdf10d8adb37038"
 metafile = true

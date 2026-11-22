@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "grxm_end_radar_integration",
+  "version": "1.0.0",
+  "name": "ISOLATED Radar Integration",
+  "environment": "server",
+  "entrypoints": {
+    "main": [
+      "dev.grxm.radar.integration.RadarIntegration"
+    ]
+  },
+  "mixins": [
+    "radar-integration.mixins.json"
+  ],
+  "depends": {
+    "grxm_end_radar": "1.0.0"
+  }
+}

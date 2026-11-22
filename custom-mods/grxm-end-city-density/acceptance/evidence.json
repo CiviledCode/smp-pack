@@ -1,0 +1,197 @@
+{
+  "artifact_sha256": "6ef777611f07786e076fd23c98f4514056b56a228efd636c5ebe194116b6771e",
+  "artifact_sha512": "f20fed0a0bd732ef9fc4882b008159b0e17cf9324f8176c5285aa4de006de8d983061ba1cc1dc0d0527074e5e4ea143e777baa8c820562f32aecffcfdf8c192a",
+  "runtime": {
+    "minecraft": "1.20.1",
+    "fabric_loader": "0.18.3",
+    "java": "17",
+    "fabric_api": "0.92.12+1.20.1"
+  },
+  "fixture_root": "/home/civ/.hermes/cache/scratch/grxm-density-final-fixtures",
+  "chunk_bounds": {
+    "min_inclusive": [
+      80,
+      80
+    ],
+    "max_exclusive": [
+      200,
+      200
+    ]
+  },
+  "biome_and_height_control_points_equal": 225,
+  "generator_config_sha256": "f9c1b8ca4624a93c856a16873a335ee08ce03615916c79a25a59bb3c4f8537b7",
+  "negative_control": "module absent with expected spacing 14: actual 20 correctly rejected",
+  "shared_server_mod_inventory": {
+    "architectury-9.2.14-fabric.jar": "bd7a7032bedb2ff96c6991a846a44c857336a51442a105f5859017e8ba9d1321",
+    "backpacked-fabric-1.20.1-2.2.7.jar": "621e5048f7d02cccdcd68904fb6f27932e8479fba7e49a6ef5c17c4bcf0faf8b",
+    "badpackets-fabric-0.4.3.jar": "4a6b84ce20d7a35d17ef86fe29417de6f25704f478ee2f5f92c7c2ee76ea899e",
+    "balm-fabric-1.20.1-7.3.41.jar": "5a613c2410a7a89b6525115eae6fe66e0a77361b1218f573fe0f3298603a01d9",
+    "bclib-3.0.18.jar": "d00200c9e8c04099fbbbf12b96af3f50daa4705fa01d42d8f6b215936f11df09",
+    "bellsandwhistles-0.4.5+1.20.1-FABRIC.jar": "9071ede319e8389428773faf537fdfeea1b94f0e1efe3e6317a3a283f50546ff",
+    "better-end-4.0.11.jar": "285feee4a2602ac66f7b4d92f0d972ac872aec513c2b61a8f6f447ca3dc08420",
+    "better-nether-9.0.10.jar": "a516b6be2576292639ee21c495be6cae3a9e3c5e9c84c6fbab092895c314fe64",
+    "Camerapture-1.10.12+mc1.20.1-fabric.jar": "7f7894302a51ce9d6bef370d5e9bd4e5dfbeb6c0d275ac43d712927429545593",
+    "clientsort-fabric-2.2.2+1.20.1.jar": "db1247ba3a7b372bc53f541482f413ce7615ba6a02774ac450f54bc5e7a91509",
+    "cloth-config-11.1.136-fabric.jar": "844f49c339c8f3144e167ab21b7d0059f0d571054e26285a0749348da25c49fa",
+    "Clumps-fabric-1.20.1-12.0.0.4.jar": "a0d0ce5923745b852de93cd831336992512f884e26872287e0a4af13e4acc67b",
+    "connectedglass-1.1.14-fabric-mc1.20.1.jar": "d9468811d7e694878883cead5cc378d26c6a9054567d6025f1dcb73053ef227f",
+    "create-fabric-6.0.8.1+build.1744-mc1.20.1.jar": "a613603fb08d967c5a4138d1adb7374c4a347b91e489fe21579a4cff4f40105a",
+    "create_oxidized-0.1.1+1.20.1.jar": "a8a79b1f9286df17003c686c0d1f00d8f1467d9f72d0067de03191cc588d9907",
+    "create_ultimate_factory-2.1.0-fabric-1.20.1.jar": "712bc4bef28eb83737d8aec23219b618c0adc267c5cf6f250f999c1481762db1",
+    "create_vibrant_vaults-0.3.2+1.20.1.jar": "c1c9269de3857ac4e5fa91b201c0d13aeea2b7251bf9ad770f1c9bc927e87517",
+    "cupboard-fabric-1.20.1-3.9.jar": "00d3c9edc9b341efc5a627243b7435e1105ff0a013e36c9d2177bc19934a2509",
+    "delightful-creators-1.3-1.20.x-FDR-support.jar": "e1a6a17b8bb30eedc15a88d1365ff67393bd8d565d76ddb8c7c66afadae747dd",
+    "fabric-api-0.92.12+1.20.1.jar": "4197ff4fbdac13cffccd267c1bc59e9fbabb2b5683a9d5f8023f4b5ea16a1c1e",
+    "FallingTree-1.20.1-4.3.4.jar": "5fb64717c368c2759e768873424a46ee5c40076600feadaac5403ca197aebe0f",
+    "FarmersDelight-1.20.1-2.4.1+refabricated.jar": "81d78e10b58e220bffbe4932de5486ac2127efc37908e89161237a34f0828fac",
+    "ferritecore-6.0.1-fabric.jar": "c7ba1118a05b2da900d1c369fbe1017a3e3ec3cafe5e51398b851279b9becf24",
+    "framework-fabric-1.20.1-0.6.16.jar": "b2ce2c5650d95d0ba8caeae21aeacee34a4ff3b5fea90633551e81f0e0518292",
+    "fusion-1.3.9-fabric-mc1.20.1.jar": "6b0423174f3b0fbb5ce4aca7873fc15784f7e744835dda80debd32e359151d07",
+    "geckolib-fabric-1.20.1-4.8.4.jar": "ee8495a8db7a83aa63e8ef248d4eadda665ff57c5911b8e59fd608806137baa6",
+    "GlitchCore-fabric-1.20.1-0.0.1.1.jar": "8cd722262900d9e6af5b4567f5539199494827e605441d9e9c1a12e1b3808307",
+    "grxm-teams-1.1.0.jar": "b01f5ed93d4997b0ed4f3ed667a67de4cb560b9eefd3db956893231af99af975",
+    "handcrafted-fabric-1.20.1-3.0.6.jar": "aa82c95a7394c5fd7278c8b89e3554bb24dae0c3e6e73282a7f19d8bb6bf4a71",
+    "icys-better-horses-2.1.8-fab-1.20.1.jar": "2e4e934bf257e84b1653eab566eadb9bc47771436c91996e36a89fff1ceb33f1",
+    "InventorySorter-1.9.0-1.20.jar": "201c454623ed5932909f0d262a3782f1e276464315f86eaa2464cc90d383a7f4",
+    "jamlib-fabric-1.3.6+1.20.1-patch.1.jar": "1f450f1d2ec041014f7892515a010842b700d17ca8bf92674b014a1cce5244f2",
+    "lithium-fabric-mc1.20.1-0.11.4.jar": "76133efe92aea907cf75562d9e26517deb170e2580e1ecd4979da2c8902de782",
+    "mcw-bridges-3.1.2-mc1.20.1fabric.jar": "7c6c48a1bb5c8dc9c00e5b4ca95a27c759e39d99ce4f3cb858c281645e40a1a5",
+    "mcw-mcwfences-1.2.1-mc1.20.1fabric.jar": "0d9e4b03246de9364b85adfce6fee3354a31f822aec1bca2c8306ebbe09a89c8",
+    "modernfix-fabric-5.25.2+mc1.20.1.jar": "5c1f852046e62a17056bb6b571164e61644076c5eb9029c92b31e337cc62c0d9",
+    "CreateNumismatics-1.0.15+fabric-mc1.20.1.jar": "b3f6fc48a7dbc4505046eedf1b25a42120c0ddf95ccbc70dac3ddaf75c6522c9",
+    "rechiseled-1.2.6-fabric-mc1.20.1.jar": "d6ed25c5ca2d4e0a1766edcc61b025a35065b5eb450c7c4c674c098abc5de00f",
+    "resourcefullib-fabric-1.20.1-2.1.29.jar": "2543d76f4f440d4401dccf7675f836381260919f0ac884e2696ae67e600adeeb",
+    "rightclickharvest-fabric-4.6.1+1.20.1.jar": "d4496d4df98083e64af435d8d0f8d5bf03bf94d5c2a2112029282a6c795f6d6e",
+    "voicechat-fabric-1.20.1-2.6.21.jar": "bb0a5bef7390bc2efeadb6e60946a8ff7b91405ac741b626cc64687cdaf812fc",
+    "smoothchunk-fabric-1.20.1-4.1.jar": "fa2ed8e060c9e451d89ecc31bc8e074ddc47f2aeb3f65051974d4743008510c4",
+    "spark-1.10.53-fabric.jar": "00c034e684fa4471b41539dc29a8d39cc6f22eb29b2fa423895efc978a391d2d",
+    "StorageDrawers-fabric-1.20.1-12.14.3.jar": "bb4238220fff1388c426556275c00a621855d8670e4f849f357f42f720fa77e0",
+    "supermartijn642configlib-1.1.8a-fabric-mc1.20.jar": "fe76c8cf001878109adbdd2f4ef877b76ddfdefdca91ff9b90353c2e8af8022c",
+    "supermartijn642corelib-1.1.21-fabric-mc1.20.1.jar": "5129a9927b8eac4a77d9b2fda4193be5e3e0f6028d79f7a7cf03885a62800817",
+    "timeoutout-1.0.3+1.19.1.jar": "5ec692b7407e174c1cdb686d880eb264991cb749fc5ed077e8ec934c71125c8b",
+    "txnilib-fabric-1.0.24-1.20.1.jar": "b1d2848cc92f94bd3c0786e68ce0e7d750c53d3b0a82bc61603d0db2753ff355",
+    "wthit-1.20.1-fabric-8.21.1.jar": "825797f642b5902e9647690681e1f1e642b60174bf0230c56094b42150cd8f9b",
+    "youre-in-grave-danger-fabric-2.0.16.jar": "f86c5d1d8766a384be61ac7f456edb654b91cb9b73b6b1b327db26a47dc0a829"
+  },
+  "baseline": {
+    "fabric_required_after_empty_selection": true,
+    "active_placement": {
+      "spacing": 20,
+      "separation": 11,
+      "spread_type": "triangular",
+      "salt": 10387313
+    },
+    "seed": 8675309,
+    "spacing": 20,
+    "separation": 11,
+    "resource_source": "vanilla",
+    "generator": "org.betterx.bclib.api.v2.generator.BCLChunkGenerator",
+    "biome_source": "org.betterx.bclib.api.v2.generator.BCLibEndBiomeSource",
+    "allowed_biomes": [
+      "minecraft:end_highlands",
+      "minecraft:end_midlands",
+      "betterend:amber_land",
+      "betterend:chorus_forest",
+      "betterend:dry_shrubland",
+      "betterend:foggy_mushroomland",
+      "betterend:glowing_grasslands",
+      "betterend:lantern_woods",
+      "betterend:neon_oasis",
+      "betterend:shadow_forest",
+      "betterend:umbrella_jungle"
+    ],
+    "candidates": 36,
+    "valid_starts": 1,
+    "rows": [
+      {
+        "x": 166,
+        "z": 122,
+        "valid": true,
+        "pieces": 82,
+        "box": "class_3341{minX=2635, minY=62, minZ=1947, maxX=2712, maxY=166, maxZ=2001}",
+        "purpur_blocks_in_start_chunk": 1591
+      }
+    ]
+  },
+  "density": {
+    "fabric_required_after_empty_selection": true,
+    "active_placement": {
+      "spacing": 14,
+      "separation": 7,
+      "spread_type": "triangular",
+      "salt": 10387313
+    },
+    "seed": 8675309,
+    "spacing": 14,
+    "separation": 7,
+    "resource_source": "fabric",
+    "generator": "org.betterx.bclib.api.v2.generator.BCLChunkGenerator",
+    "biome_source": "org.betterx.bclib.api.v2.generator.BCLibEndBiomeSource",
+    "allowed_biomes": [
+      "minecraft:end_highlands",
+      "minecraft:end_midlands",
+      "betterend:amber_land",
+      "betterend:chorus_forest",
+      "betterend:dry_shrubland",
+      "betterend:foggy_mushroomland",
+      "betterend:glowing_grasslands",
+      "betterend:lantern_woods",
+      "betterend:neon_oasis",
+      "betterend:shadow_forest",
+      "betterend:umbrella_jungle"
+    ],
+    "candidates": 78,
+    "valid_starts": 6,
+    "rows": [
+      {
+        "x": 87,
+        "z": 89,
+        "valid": true,
+        "pieces": 10,
+        "box": "class_3341{minX=1387, minY=60, minZ=1419, maxX=1403, maxY=101, maxZ=1435}",
+        "purpur_blocks_in_start_chunk": 1010
+      },
+      {
+        "x": 102,
+        "z": 129,
+        "valid": true,
+        "pieces": 110,
+        "box": "class_3341{minX=1599, minY=65, minZ=2038, maxX=1671, maxY=141, maxZ=2099}",
+        "purpur_blocks_in_start_chunk": 1139
+      },
+      {
+        "x": 115,
+        "z": 145,
+        "valid": true,
+        "pieces": 10,
+        "box": "class_3341{minX=1844, minY=62, minZ=2324, maxX=1859, maxY=98, maxZ=2339}",
+        "purpur_blocks_in_start_chunk": 868
+      },
+      {
+        "x": 127,
+        "z": 159,
+        "valid": true,
+        "pieces": 11,
+        "box": "class_3341{minX=2035, minY=61, minZ=2547, maxX=2051, maxY=106, maxZ=2563}",
+        "purpur_blocks_in_start_chunk": 1301
+      },
+      {
+        "x": 143,
+        "z": 127,
+        "valid": true,
+        "pieces": 15,
+        "box": "class_3341{minX=2283, minY=60, minZ=2027, maxX=2298, maxY=92, maxZ=2059}",
+        "purpur_blocks_in_start_chunk": 785
+      },
+      {
+        "x": 185,
+        "z": 158,
+        "valid": true,
+        "pieces": 154,
+        "box": "class_3341{minX=2902, minY=60, minZ=2499, maxX=3036, maxY=164, maxZ=2620}",
+        "purpur_blocks_in_start_chunk": 1313
+      }
+    ]
+  },
+  "scope": "Finite single-seed sample, not an estimate of universal actual-city multiplier. FULL generation for each valid start chunk; not every chunk of every complete city bounding box."
+}

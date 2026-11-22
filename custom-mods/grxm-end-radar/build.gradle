@@ -1,0 +1,22 @@
+plugins { id 'fabric-loom' version '1.9.2' }
+version = '1.0.0'
+group = 'dev.grxm'
+base { archivesName = 'grxm-end-radar' }
+repositories { mavenCentral() }
+dependencies {
+    minecraft 'com.mojang:minecraft:1.20.1'
+    mappings loom.officialMojangMappings()
+    modImplementation 'net.fabricmc:fabric-loader:0.18.3'
+    modImplementation 'net.fabricmc.fabric-api:fabric-api:0.92.12+1.20.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+}
+java { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17; withSourcesJar() }
+tasks.withType(JavaCompile).configureEach { options.release = 17; options.encoding = 'UTF-8' }
+tasks.withType(AbstractArchiveTask).configureEach { preserveFileTimestamps = false; reproducibleFileOrder = true }
+processResources { inputs.property 'version', project.version; filesMatching('fabric.mod.json') { expand version: project.version } }
+test { useJUnitPlatform(); testLogging { events 'passed', 'failed', 'skipped' } }
+sourceSets { integration { compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath } }
+tasks.register('integrationJar', Jar) { dependsOn integrationClasses; from sourceSets.integration.output; archiveClassifier = 'integration-dev' }
+tasks.register('remapIntegrationJar', net.fabricmc.loom.task.RemapJarTask) {
+    dependsOn integrationJar; inputFile = tasks.integrationJar.archiveFile; archiveClassifier = 'integration-test'; addNestedDependencies = false
+}

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "grxm_end_radar",
+  "version": "${version}",
+  "name": "GRXM End Radar",
+  "description": "Reusable one-city distance-only End Radar with durable global reservations and warmer/colder readings.",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.grxm.radar.RadarMod"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=0.18.3",
+    "minecraft": "1.20.1",
+    "java": ">=17",
+    "fabric-api": ">=0.92.12+1.20.1"
+  }
+}

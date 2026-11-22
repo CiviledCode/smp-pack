@@ -1,0 +1,3 @@
+acceptance/.gradle/
+acceptance/build/
+__pycache__/

@@ -1,0 +1,9 @@
+# Immutable release artifact; publish the tag before staging installation.
+name = "GRXM End Radar"
+filename = "grxm-end-radar-1.0.0.jar"
+side = "both"
+
+[download]
+url = "https://raw.githubusercontent.com/CiviledCode/smp-pack/v1.7.0/assets/mods/grxm-end-radar-1.0.0.jar"
+hash-format = "sha256"
+hash = "69e42f4654d9e8e77fe0c2b5673ac09ed95fc47afa8fa08875050533992383c5"

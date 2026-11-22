@@ -1,0 +1,9 @@
+# Immutable release artifact; publish the tag before staging installation.
+name = "GRXM End City Density"
+filename = "grxm-end-city-density-1.0.0.jar"
+side = "server"
+
+[download]
+url = "https://raw.githubusercontent.com/CiviledCode/smp-pack/v1.7.0/assets/mods/grxm-end-city-density-1.0.0.jar"
+hash-format = "sha256"
+hash = "6ef777611f07786e076fd23c98f4514056b56a228efd636c5ebe194116b6771e"
