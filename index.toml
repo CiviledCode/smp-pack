@@ -354,6 +354,11 @@ hash = "e12dce3e543168379a2856c66064ee2001e6420a9dfc6163f37b78e518947456"
 metafile = true
 
 [[files]]
+file = "mods/axiom.pw.toml"
+hash = "059a497b3bc326f39e7585eca6021f04e9ce2545c21f00e57e72ef48643148ae"
+metafile = true
+
+[[files]]
 file = "mods/backpacked-fabric.pw.toml"
 hash = "a91fa301e31795f516f9f12295e17bb3f22aa56ba93fd9b13af6e8bd3ae1e5c6"
 metafile = true
@@ -711,6 +716,16 @@ metafile = true
 [[files]]
 file = "mods/windy.pw.toml"
 hash = "dcf90975dc5b29f3dbbd1f17892133aed422cd8a7f7c61cc3d414ce82faa6b58"
+metafile = true
+
+[[files]]
+file = "mods/worldedit-cui.pw.toml"
+hash = "23aa2284586134615ce6ac95d04c2f4612b3e9ee9b754deb8c851c5c1d46a1a5"
+metafile = true
+
+[[files]]
+file = "mods/worldedit.pw.toml"
+hash = "810c63c5de675c9cb2f29c4e63231ae4d35d83f906d3279ac5c7a83132fe387c"
 metafile = true
 
 [[files]]
